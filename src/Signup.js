@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-
+import './Signup.css';
 const Signup = () => {
   const [userid, setUserid] = useState('');
   const [userpassword, setUserpassword] = useState('');
@@ -38,27 +38,30 @@ const Signup = () => {
   return (
     <div className="signup">
       <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="User ID"
-          value={userid}
-          onChange={(e) => setUserid(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={userpassword}
-          onChange={(e) => setUserpassword(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <button type="submit">Sign Up</button>
-      </form>
+      <div className="character"></div> {/* 캐릭터 애니메이션 추가 */}
+      <div className="form-container">
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="User ID"
+            value={userid}
+            onChange={(e) => setUserid(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={userpassword}
+            onChange={(e) => setUserpassword(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <button type="submit">Sign Up</button>
+        </form>
+      </div>
     </div>
   );
 };
