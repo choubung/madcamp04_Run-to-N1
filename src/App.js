@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './Home';
 import Login from './Login';
@@ -9,7 +9,31 @@ import Mypage from './Mypage';
 import MainHome from './MainHome';
 import { AuthProvider } from './AuthContext';
 
-function App() {
+const App = () => {
+  const gameDimensions = {
+    width: 1014,
+    height: 596,
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      if (
+        windowWidth < gameDimensions.width ||
+        windowHeight < gameDimensions.height
+      ) {
+        alert('The browser window is too small for this game.');
+        window.resizeTo(gameDimensions.width, gameDimensions.height);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
@@ -23,10 +47,19 @@ function App() {
             <Route path="/mainhome" element={<MainHome />} />
             <Route path="/mypage" element={<Mypage />} />
           </Routes>
+          <div
+            className="game-area"
+            style={{
+              width: `${gameDimensions.width}px`,
+              height: `${gameDimensions.height}px`,
+            }}
+          >
+            <Game width={gameDimensions.width} height={gameDimensions.height} />
+          </div>
         </div>
       </Router>
     </AuthProvider>
   );
-}
+};
 
 export default App;
