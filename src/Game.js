@@ -21,6 +21,7 @@ const Game = ({ width, height }) => {
   const [obstacleImage, setObstacleImage] = useState(null);
   const [characterImages, setCharacterImages] = useState([]);
   const [bgImage, setBgImage] = useState(null);
+  const [lastObstacleX, setLastObstacleX] = useState(0); // 마지막 장애물의 X 위치
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -125,16 +126,24 @@ const Game = ({ width, height }) => {
         ]);
       }
 
+      // 장애물 생성
       if (Math.random() < 0.03) {
-        setObstacles((prev) => [
-          ...prev,
-          {
-            x: width,
-            y: height - 88 - character.height / 2, // 기존 위치에서 추가로 3px 더 위로 이동
-            width: 38,
-            height: 38,
-          },
-        ]);
+        const minGap = 140; // 최소 간격
+        const maxGap = 200; // 최대 간격
+        const gap = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
+
+        if (width - lastObstacleX >= gap) {
+          setObstacles((prev) => [
+            ...prev,
+            {
+              x: width,
+              y: height - 88 - character.height / 2, // 기존 위치에서 추가로 3px 더 위로 이동
+              width: 38,
+              height: 38,
+            },
+          ]);
+          setLastObstacleX(width); // 마지막 장애물의 X 위치 업데이트
+        }
       }
 
       setJellies((prev) =>
@@ -146,7 +155,14 @@ const Game = ({ width, height }) => {
       setObstacles((prev) =>
         prev
           .map((obstacle) => ({ ...obstacle, x: obstacle.x - 5 }))
-          .filter((obstacle) => obstacle.x > -50)
+          .filter((obstacle) => {
+            if (obstacle.x > -50) {
+              setLastObstacleX(obstacle.x); // 장애물의 현재 X 위치 업데이트
+              return true;
+            } else {
+              return false;
+            }
+          })
       );
 
       jellies.forEach((jelly, index) => {
@@ -181,12 +197,13 @@ const Game = ({ width, height }) => {
             width: 38,
             height: 64,
           });
+          setLastObstacleX(0); // 마지막 장애물의 X 위치 초기화
         }
       });
     }, 30);
 
     return () => clearInterval(interval);
-  }, [character, jellies, obstacles, width, height]);
+  }, [character, jellies, obstacles, width, height, lastObstacleX]);
 
   return (
     <div>
