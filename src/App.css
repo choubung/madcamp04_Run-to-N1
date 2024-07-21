@@ -12,11 +12,6 @@ body {
   min-height: 596px;
 }
 
-/* body {
-  margin: 0;
-  overflow: hidden;
-} */
-
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -27,6 +22,13 @@ body {
 .App {
   text-align: center;
   padding: 20px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .home {
@@ -39,17 +41,21 @@ body {
   gap: 10px;
 }
 
-button {
+/* button {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
-}
-
+} */
+.home,
 .login,
 .signup,
-.tutorial {
-  max-width: 400px;
-  margin: 20px auto;
+.tutorial,
+.mainhome {
+  min-width: 1014px;
+  min-height: 596px;
+
+  /* max-width: 400px; */
+  /* margin: 20px auto; */
   padding: 20px;
   background-color: white;
   border-radius: 10px;
@@ -79,12 +85,49 @@ button {
 button:hover {
   background-color: #0056b3;
 }
+
 .game-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  width: 1014px;
+  height: 596px;
+  background-color: white; /* 게임 배경 색상 */
+  position: relative;
 }
 
-.game-area {
-  position: relative;
+.game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000;
+}
+
+.game-over button {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  transition: background-color 0.3s;
+  /* font-family: 'Press Start 2P', cursive; */
+
+  font-family: 'NeoDunggeunmo', sans-serif;
+}
+
+.game-over button:hover {
+  background-color: #45a049;
+}
+
+.home a {
+  text-decoration: none; /* 링크 밑줄 제거 */
 }

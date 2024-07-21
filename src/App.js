@@ -8,6 +8,7 @@ import Tutorial from './Tutorial';
 import Mypage from './Mypage';
 import MainHome from './MainHome';
 import { AuthProvider } from './AuthContext';
+import './App.css';
 
 const App = () => {
   const gameDimensions = {
@@ -24,7 +25,7 @@ const App = () => {
         windowWidth < gameDimensions.width ||
         windowHeight < gameDimensions.height
       ) {
-        alert('The browser window is too small for this game.');
+        //  alert('The browser window is too small for this game.');
         window.resizeTo(gameDimensions.width, gameDimensions.height);
       }
     };
@@ -35,26 +36,52 @@ const App = () => {
   }, []);
 
   return (
+    // <AuthProvider>
+    //   <Router>
+    //     <div className="App">
+    //       <Routes>
+    //         <Route path="/" element={<Home />} />
+    //         <Route path="/login" element={<Login />} />
+    //         <Route path="/signup" element={<Signup />} />
+    //         <Route path="/game" element={<Game />} />
+    //         <Route path="/tutorial" element={<Tutorial />} />
+    //         <Route path="/mainhome" element={<MainHome />} />
+    //         <Route path="/mypage" element={<Mypage />} />
+    //       </Routes>
+    //       <div
+    //         className="game-area"
+    //         style={{
+    //           width: `${gameDimensions.width}px`,
+    //           height: `${gameDimensions.height}px`,
+    //         }}
+    //       >
+    //         <Game width={gameDimensions.width} height={gameDimensions.height} />
+    //       </div>
+    //     </div>
+    //   </Router>
+    // </AuthProvider>
+
     <AuthProvider>
       <Router>
         <div className="App">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/game" element={<Game />} />
-            <Route path="/tutorial" element={<Tutorial />} />
-            <Route path="/mainhome" element={<MainHome />} />
-            <Route path="/mypage" element={<Mypage />} />
-          </Routes>
-          <div
-            className="game-area"
-            style={{
-              width: `${gameDimensions.width}px`,
-              height: `${gameDimensions.height}px`,
-            }}
-          >
-            <Game width={gameDimensions.width} height={gameDimensions.height} />
+          <div className="game-container">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route
+                path="/game"
+                element={
+                  <Game
+                    width={gameDimensions.width}
+                    height={gameDimensions.height}
+                  />
+                }
+              />
+              <Route path="/tutorial" element={<Tutorial />} />
+              <Route path="/mainhome" element={<MainHome />} />
+              <Route path="/mypage" element={<Mypage />} />
+            </Routes>
           </div>
         </div>
       </Router>

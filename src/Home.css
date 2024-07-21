@@ -1,6 +1,6 @@
 .home {
   text-align: center;
-  background-image: url('./images/bg_starting_point.png');
+  background-image: url('./images/5-2-05.png');
   background-size: cover;
   background-repeat: repeat-x;
   background-position: 0 0;
@@ -10,7 +10,8 @@
   justify-content: center;
   align-items: center;
   color: #fff;
-  font-family: 'Press Start 2P', cursive; /* Pixel Art 스타일 폰트 사용 */
+  /* font-family: 'Press Start 2P', cursive; Pixel Art 스타일 폰트 사용 */
+  font-family: 'NeoDunggeunmo', sans-serif;
   animation: moveBackground 20s linear infinite;
 }
 

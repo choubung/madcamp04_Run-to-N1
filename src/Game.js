@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Rect } from 'react-konva';
 import { loadImage } from './utilities'; // loadImage 함수 임포트
+import { useNavigate } from 'react-router-dom';
 
 const Game = ({ width, height }) => {
   const stageRef = useRef(null);
+  const navigate = useNavigate();
   const [character, setCharacter] = useState({
-    x: 120, // 기존 위치에서 70px 오른쪽으로 이동
-    y: 290, // 기존 위치에서 75px 아래로 이동 (70px + 5px)
+    x: 120,
+    y: height - 115 - 64,
     vy: 0,
     isJumping: false,
     frame: 0,
@@ -21,15 +23,14 @@ const Game = ({ width, height }) => {
   const [obstacleImage, setObstacleImage] = useState(null);
   const [characterImages, setCharacterImages] = useState([]);
   const [bgImage, setBgImage] = useState(null);
-  const [lastObstacleX, setLastObstacleX] = useState(0); // 마지막 장애물의 X 위치
+  const [lastObstacleX, setLastObstacleX] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
 
   const gravity = 0.8;
   const jumpStrength = -12;
-  const maxJumpHeight = jumpStrength ** 2 / (2 * gravity); // 캐릭터가 점프할 수 있는 최대 높이
+  const maxJumpHeight = jumpStrength ** 2 / (2 * gravity);
 
-  // 디버그 모드를 위한 설정
-  const debugMode = true; // 디버그 모드를 켜려면 true로 설정, 끄려면 false로 설정
+  const debugMode = false; // 디버그 모드를 켜려면 true로 설정, 끄려면 false로 설정
 
   const handleKeyDown = (e) => {
     if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
@@ -95,7 +96,7 @@ const Game = ({ width, height }) => {
   }, []);
 
   useEffect(() => {
-    const newY = height - character.height - 115; // 기존 위치에서 75px 아래로 이동 (70px + 5px)
+    const newY = height - character.height - 115;
     setCharacter((prev) => ({ ...prev, y: newY }));
   }, [height]);
 
@@ -110,8 +111,7 @@ const Game = ({ width, height }) => {
           let isJumping = true;
 
           if (newY >= height - 115 - prev.height) {
-            // 기존 위치에서 75px 아래로 이동 (70px + 5px)
-            newY = height - 115 - prev.height; // 기존 위치에서 75px 아래로 이동 (70px + 5px)
+            newY = height - 115 - prev.height;
             newVy = 0;
             isJumping = false;
           }
@@ -121,8 +121,8 @@ const Game = ({ width, height }) => {
         });
 
         if (Math.random() < 0.033) {
-          const minY = height - 88 - character.height / 2 - 32; // 장애물과 같은 최저 높이
-          const maxY = height - 115 - character.height - maxJumpHeight - 32; // 캐릭터가 점프했을 때 닿는 높이
+          const minY = height - 88 - character.height / 2 - 32;
+          const maxY = height - 115 - character.height - maxJumpHeight - 32;
           const jellyY = Math.random() * (maxY - minY) + minY;
 
           setJellies((prev) => [
@@ -136,10 +136,9 @@ const Game = ({ width, height }) => {
           ]);
         }
 
-        // 장애물 생성
         if (Math.random() < 0.03) {
-          const minGap = 120; // 최소 간격
-          const maxGap = 200; // 최대 간격
+          const minGap = 120;
+          const maxGap = 200;
           const gap =
             Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
 
@@ -148,12 +147,12 @@ const Game = ({ width, height }) => {
               ...prev,
               {
                 x: width,
-                y: height - 88 - character.height / 2, // 기존 위치에서 추가로 3px 더 위로 이동
+                y: height - 88 - character.height / 2,
                 width: 38,
                 height: 38,
               },
             ]);
-            setLastObstacleX(width); // 마지막 장애물의 X 위치 업데이트
+            setLastObstacleX(width);
           }
         }
 
@@ -168,7 +167,7 @@ const Game = ({ width, height }) => {
             .map((obstacle) => ({ ...obstacle, x: obstacle.x - 5 }))
             .filter((obstacle) => {
               if (obstacle.x > -50) {
-                setLastObstacleX(obstacle.x); // 장애물의 현재 X 위치 업데이트
+                setLastObstacleX(obstacle.x);
                 return true;
               } else {
                 return false;
@@ -196,7 +195,7 @@ const Game = ({ width, height }) => {
             character.y + character.height > obstacle.y
           ) {
             setIsGameOver(true);
-            alert('Game Over!');
+            // alert('Game Over!');
           }
         });
       }
@@ -221,7 +220,9 @@ const Game = ({ width, height }) => {
       height: 64,
     });
   };
-
+  const goToHome = () => {
+    navigate('/');
+  };
   return (
     <div
       style={{
@@ -341,6 +342,13 @@ const Game = ({ width, height }) => {
       >
         SCORE {score}
       </div>
+      {isGameOver && (
+        <div className="game-over">
+          <button onClick={resetGame}>다시 하기</button>
+          <button onClick={goToHome}>홈으로 가기</button>
+          <button>점수 보기</button>
+        </div>
+      )}
     </div>
   );
 };

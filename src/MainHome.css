@@ -13,6 +13,9 @@
   font-family: 'Press Start 2P', cursive; /* Pixel Art 스타일 폰트 사용 */
   animation: moveBackground 20s linear infinite;
 }
+.mainhome a {
+  text-decoration: none; /* 링크 밑줄 제거 */
+}
 
 @keyframes moveBackground {
   0% {
