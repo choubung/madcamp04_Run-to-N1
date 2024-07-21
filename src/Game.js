@@ -22,6 +22,7 @@ const Game = ({ width, height }) => {
   const [characterImages, setCharacterImages] = useState([]);
   const [bgImage, setBgImage] = useState(null);
   const [lastObstacleX, setLastObstacleX] = useState(0); // 마지막 장애물의 X 위치
+  const [isGameOver, setIsGameOver] = useState(false);
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -33,6 +34,9 @@ const Game = ({ width, height }) => {
   const handleKeyDown = (e) => {
     if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
       setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
+    }
+    if (e.key === 'Enter' && isGameOver) {
+      resetGame();
     }
   };
 
@@ -49,7 +53,7 @@ const Game = ({ width, height }) => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [character.isJumping]);
+  }, [character.isJumping, isGameOver]);
 
   useEffect(() => {
     loadImage(require('./images/americano.png'))
@@ -97,118 +101,126 @@ const Game = ({ width, height }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBackgroundX((prev) => (prev - 5) % width);
+      if (!isGameOver) {
+        setBackgroundX((prev) => (prev - 5) % width);
 
-      setCharacter((prev) => {
-        let newY = prev.y + prev.vy;
-        let newVy = prev.vy + gravity;
-        let isJumping = true;
+        setCharacter((prev) => {
+          let newY = prev.y + prev.vy;
+          let newVy = prev.vy + gravity;
+          let isJumping = true;
 
-        if (newY >= height - 115 - prev.height) {
-          // 기존 위치에서 75px 아래로 이동 (70px + 5px)
-          newY = height - 115 - prev.height; // 기존 위치에서 75px 아래로 이동 (70px + 5px)
-          newVy = 0;
-          isJumping = false;
-        }
+          if (newY >= height - 115 - prev.height) {
+            // 기존 위치에서 75px 아래로 이동 (70px + 5px)
+            newY = height - 115 - prev.height; // 기존 위치에서 75px 아래로 이동 (70px + 5px)
+            newVy = 0;
+            isJumping = false;
+          }
 
-        const newFrame = (prev.frame + 1 / 5) % 4;
-        return { ...prev, y: newY, vy: newVy, isJumping, frame: newFrame };
-      });
+          const newFrame = (prev.frame + 1 / 5) % 4;
+          return { ...prev, y: newY, vy: newVy, isJumping, frame: newFrame };
+        });
 
-      if (Math.random() < 0.033) {
-        const minY = height - 88 - character.height / 2 - 32; // 장애물과 같은 최저 높이
-        const maxY = height - 115 - character.height - maxJumpHeight - 32; // 캐릭터가 점프했을 때 닿는 높이
-        const jellyY = Math.random() * (maxY - minY) + minY;
+        if (Math.random() < 0.033) {
+          const minY = height - 88 - character.height / 2 - 32; // 장애물과 같은 최저 높이
+          const maxY = height - 115 - character.height - maxJumpHeight - 32; // 캐릭터가 점프했을 때 닿는 높이
+          const jellyY = Math.random() * (maxY - minY) + minY;
 
-        setJellies((prev) => [
-          ...prev,
-          {
-            x: width,
-            y: jellyY,
-            width: 32,
-            height: 32,
-          },
-        ]);
-      }
-
-      // 장애물 생성
-      if (Math.random() < 0.03) {
-        const minGap = 120; // 최소 간격
-        const maxGap = 200; // 최대 간격
-        const gap = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
-
-        if (width - lastObstacleX >= gap) {
-          setObstacles((prev) => [
+          setJellies((prev) => [
             ...prev,
             {
               x: width,
-              y: height - 88 - character.height / 2, // 기존 위치에서 추가로 3px 더 위로 이동
-              width: 38,
-              height: 38,
+              y: jellyY,
+              width: 32,
+              height: 32,
             },
           ]);
-          setLastObstacleX(width); // 마지막 장애물의 X 위치 업데이트
         }
+
+        // 장애물 생성
+        if (Math.random() < 0.03) {
+          const minGap = 120; // 최소 간격
+          const maxGap = 200; // 최대 간격
+          const gap =
+            Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
+
+          if (width - lastObstacleX >= gap) {
+            setObstacles((prev) => [
+              ...prev,
+              {
+                x: width,
+                y: height - 88 - character.height / 2, // 기존 위치에서 추가로 3px 더 위로 이동
+                width: 38,
+                height: 38,
+              },
+            ]);
+            setLastObstacleX(width); // 마지막 장애물의 X 위치 업데이트
+          }
+        }
+
+        setJellies((prev) =>
+          prev
+            .map((jelly) => ({ ...jelly, x: jelly.x - 5 }))
+            .filter((jelly) => jelly.x > -50)
+        );
+
+        setObstacles((prev) =>
+          prev
+            .map((obstacle) => ({ ...obstacle, x: obstacle.x - 5 }))
+            .filter((obstacle) => {
+              if (obstacle.x > -50) {
+                setLastObstacleX(obstacle.x); // 장애물의 현재 X 위치 업데이트
+                return true;
+              } else {
+                return false;
+              }
+            })
+        );
+
+        jellies.forEach((jelly, index) => {
+          if (
+            character.x < jelly.x + jelly.width &&
+            character.x + character.width > jelly.x &&
+            character.y < jelly.y + jelly.height &&
+            character.y + character.height > jelly.y
+          ) {
+            setJellies((prev) => prev.filter((_, i) => i !== index));
+            setScore((prev) => prev + 1);
+          }
+        });
+
+        obstacles.forEach((obstacle, index) => {
+          if (
+            character.x < obstacle.x + obstacle.width &&
+            character.x + character.width > obstacle.x &&
+            character.y < obstacle.y + obstacle.height &&
+            character.y + character.height > obstacle.y
+          ) {
+            setIsGameOver(true);
+            alert('Game Over!');
+          }
+        });
       }
-
-      setJellies((prev) =>
-        prev
-          .map((jelly) => ({ ...jelly, x: jelly.x - 5 }))
-          .filter((jelly) => jelly.x > -50)
-      );
-
-      setObstacles((prev) =>
-        prev
-          .map((obstacle) => ({ ...obstacle, x: obstacle.x - 5 }))
-          .filter((obstacle) => {
-            if (obstacle.x > -50) {
-              setLastObstacleX(obstacle.x); // 장애물의 현재 X 위치 업데이트
-              return true;
-            } else {
-              return false;
-            }
-          })
-      );
-
-      jellies.forEach((jelly, index) => {
-        if (
-          character.x < jelly.x + jelly.width &&
-          character.x + character.width > jelly.x &&
-          character.y < jelly.y + jelly.height &&
-          character.y + character.height > jelly.y
-        ) {
-          setJellies((prev) => prev.filter((_, i) => i !== index));
-          setScore((prev) => prev + 1);
-        }
-      });
-
-      obstacles.forEach((obstacle, index) => {
-        if (
-          character.x < obstacle.x + obstacle.width &&
-          character.x + character.width > obstacle.x &&
-          character.y < obstacle.y + obstacle.height &&
-          character.y + character.height > obstacle.y
-        ) {
-          alert('Game Over!');
-          setScore(0);
-          setJellies([]);
-          setObstacles([]);
-          setCharacter({
-            x: 120, // 기존 위치에서 70px 오른쪽으로 이동
-            y: height - 115 - character.height, // 기존 위치에서 75px 아래로 이동 (70px + 5px)
-            vy: 0,
-            isJumping: false,
-            frame: 0,
-            width: 38,
-            height: 64,
-          });
-          setLastObstacleX(0); // 마지막 장애물의 X 위치 초기화
-        }
-      });
     }, 30);
 
     return () => clearInterval(interval);
-  }, [character, jellies, obstacles, width, height, lastObstacleX]);
+  }, [character, jellies, obstacles, width, height, lastObstacleX, isGameOver]);
+
+  const resetGame = () => {
+    setIsGameOver(false);
+    setScore(0);
+    setJellies([]);
+    setObstacles([]);
+    setLastObstacleX(0);
+    setCharacter({
+      x: 120,
+      y: height - 115 - character.height,
+      vy: 0,
+      isJumping: false,
+      frame: 0,
+      width: 38,
+      height: 64,
+    });
+  };
 
   return (
     <div
