@@ -115,7 +115,7 @@ const Game = ({ width, height }) => {
         return { ...prev, y: newY, vy: newVy, isJumping, frame: newFrame };
       });
 
-      if (Math.random() < 0.04) {
+      if (Math.random() < 0.033) {
         const minY = height - 88 - character.height / 2 - 32; // 장애물과 같은 최저 높이
         const maxY = height - 115 - character.height - maxJumpHeight - 32; // 캐릭터가 점프했을 때 닿는 높이
         const jellyY = Math.random() * (maxY - minY) + minY;
@@ -133,8 +133,8 @@ const Game = ({ width, height }) => {
 
       // 장애물 생성
       if (Math.random() < 0.03) {
-        const minGap = 110; // 최소 간격
-        const maxGap = 180; // 최대 간격
+        const minGap = 120; // 최소 간격
+        const maxGap = 200; // 최대 간격
         const gap = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
 
         if (width - lastObstacleX >= gap) {
@@ -211,10 +211,16 @@ const Game = ({ width, height }) => {
   }, [character, jellies, obstacles, width, height, lastObstacleX]);
 
   return (
-    <div>
+    <div
+      style={{
+        position: 'relative',
+        width: `${width}px`,
+        height: `${height}px`,
+      }}
+    >
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
-          <Text text={`Score: ${score}`} fontSize={24} x={10} y={40} />
+          <Text text="Cookie Run" fontSize={24} x={10} y={10} />
 
           {bgImage && (
             <>
@@ -312,6 +318,17 @@ const Game = ({ width, height }) => {
           )}
         </Layer>
       </Stage>
+      <div
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          fontSize: '24px',
+          color: 'black',
+        }}
+      >
+        SCORE {score}
+      </div>
     </div>
   );
 };
