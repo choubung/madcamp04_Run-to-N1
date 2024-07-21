@@ -25,6 +25,7 @@ const Game = ({ width, height }) => {
 
   const gravity = 0.8;
   const jumpStrength = -12;
+  const maxJumpHeight = jumpStrength ** 2 / (2 * gravity); // 캐릭터가 점프할 수 있는 최대 높이
 
   // 디버그 모드를 위한 설정
   const debugMode = true; // 디버그 모드를 켜려면 true로 설정, 끄려면 false로 설정
@@ -114,12 +115,16 @@ const Game = ({ width, height }) => {
         return { ...prev, y: newY, vy: newVy, isJumping, frame: newFrame };
       });
 
-      if (Math.random() < 0.05) {
+      if (Math.random() < 0.04) {
+        const minY = height - 88 - character.height / 2 - 32; // 장애물과 같은 최저 높이
+        const maxY = height - 115 - character.height - maxJumpHeight - 32; // 캐릭터가 점프했을 때 닿는 높이
+        const jellyY = Math.random() * (maxY - minY) + minY;
+
         setJellies((prev) => [
           ...prev,
           {
             x: width,
-            y: Math.random() * (height - 100) + 50,
+            y: jellyY,
             width: 32,
             height: 32,
           },
@@ -128,8 +133,8 @@ const Game = ({ width, height }) => {
 
       // 장애물 생성
       if (Math.random() < 0.03) {
-        const minGap = 140; // 최소 간격
-        const maxGap = 200; // 최대 간격
+        const minGap = 110; // 최소 간격
+        const maxGap = 180; // 최대 간격
         const gap = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
 
         if (width - lastObstacleX >= gap) {
@@ -209,7 +214,6 @@ const Game = ({ width, height }) => {
     <div>
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
-          <Text text="Cookie Run" fontSize={24} x={10} y={10} />
           <Text text={`Score: ${score}`} fontSize={24} x={10} y={40} />
 
           {bgImage && (
