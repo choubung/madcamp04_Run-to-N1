@@ -28,6 +28,8 @@ const Game = ({ width, height }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [lastObstacleX, setLastObstacleX] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [nextBackgroundX, setNextBackgroundX] = useState(width);
+  const [nextBgImage, setNextBgImage] = useState(null);
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -91,9 +93,8 @@ const Game = ({ width, height }) => {
 
     const bgPaths = [
       require('./images/bg_starting_point.png'),
-      require('./images/bg_basic.png'),
+      require('./images/bg_road.png'),
       require('./images/bg_lake.png'),
-      require('./images/bg_basic.png'),
       require('./images/bg_kaimaru.png'),
       require('./images/bg_mugunghwa.png'),
       require('./images/bg_n1.png'),
@@ -103,6 +104,7 @@ const Game = ({ width, height }) => {
       .then((images) => {
         setBgImages(images);
         setBgImage(images[0]);
+        setNextBgImage(images[1]);
       })
       .catch((err) => {
         console.error('Failed to load background images:', err);
@@ -117,7 +119,23 @@ const Game = ({ width, height }) => {
   useEffect(() => {
     let interval = setInterval(() => {
       if (!isGameOver && !isPaused) {
-        setBackgroundX((prev) => (prev - 5) % width);
+        setBackgroundX((prev) => prev - 5);
+        setNextBackgroundX((prev) => prev - 5);
+        if (nextBackgroundX <= 0) {
+          if (bgIndex === bgImages.length - 1) {
+            setIsGameOver(true);
+            setJellies([]);
+            setObstacles([]);
+            return;
+          }
+
+          setBackgroundX(0);
+          setNextBackgroundX(width);
+          setBgImage(nextBgImage);
+          const newIndex = (bgIndex + 1) % bgImages.length;
+          setNextBgImage(bgImages[newIndex]);
+          setBgIndex(newIndex);
+        }
 
         setCharacter((prev) => {
           let newY = prev.y + prev.vy;
@@ -226,34 +244,38 @@ const Game = ({ width, height }) => {
     lastObstacleX,
     isGameOver,
     isPaused,
+    bgImages,
+    nextBgImage,
+    nextBackgroundX,
+    bgIndex,
   ]);
 
-  useEffect(() => {
-    const bgDurations = [0, 30, 15, 30, 15, 30, 0];
+  // useEffect(() => {
+  //   const bgDurations = [0, 30, 15, 30, 15, 30, 0];
 
-    const changeBackground = (index) => {
-      if (index < bgImages.length) {
-        setBgImage(bgImages[index]);
-        if (bgDurations[index] > 0) {
-          if (index % 2 === 2) {
-            // 정지할 시간일 때
-            setIsPaused(true);
-            setTimeout(() => {
-              setIsPaused(false);
-              changeBackground(index + 1);
-            }, bgDurations[index] * 1000);
-          } else {
-            setTimeout(
-              () => changeBackground(index + 1),
-              bgDurations[index] * 1000
-            );
-          }
-        }
-      }
-    };
+  //   const changeBackground = (index) => {
+  //     if (index < bgImages.length) {
+  //       setBgImage(bgImages[index]);
+  //       if (bgDurations[index] > 0) {
+  //         if (index % 2 === 2) {
+  //           // 정지할 시간일 때
+  //           setIsPaused(true);
+  //           setTimeout(() => {
+  //             setIsPaused(false);
+  //             changeBackground(index + 1);
+  //           }, bgDurations[index] * 1000);
+  //         } else {
+  //           setTimeout(
+  //             () => changeBackground(index + 1),
+  //             bgDurations[index] * 1000
+  //           );
+  //         }
+  //       }
+  //     }
+  //   };
 
-    changeBackground(0);
-  }, [bgImages]);
+  //   changeBackground(0);
+  // }, [bgImages]);
 
   const resetGame = () => {
     setIsGameOver(false);
@@ -270,12 +292,24 @@ const Game = ({ width, height }) => {
       width: 38,
       height: 64,
     });
+    setBgIndex(0);
+    setBgImage(bgImages[0]);
+    setNextBgImage(bgImages[1]);
+    setBackgroundX(0);
+    setNextBackgroundX(width);
   };
   const goToHome = () => {
     navigate('/');
   };
   return (
-    <div className="game">
+    <div
+      className="game"
+      style={{
+        position: 'relative',
+        width: `${width}px`,
+        height: `${height}px`,
+      }}
+    >
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
           <Text text="Cookie Run" fontSize={24} x={10} y={10} />
@@ -290,11 +324,11 @@ const Game = ({ width, height }) => {
                 image={bgImage}
               />
               <KonvaImage
-                x={backgroundX + width}
+                x={nextBackgroundX}
                 y={0}
                 width={width}
                 height={height}
-                image={bgImage}
+                image={nextBgImage}
               />
             </>
           )}
@@ -378,7 +412,7 @@ const Game = ({ width, height }) => {
       </Stage>
       <div
         style={{
-          position: 'relative',
+          position: 'absolute',
           top: 10,
           right: 10,
           fontSize: '24px',
