@@ -133,3 +133,17 @@ button:hover {
 .home a {
   text-decoration: none; /* 링크 밑줄 제거 */
 }
+
+/* App.css */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-out {
+  animation: fadeOut 1s forwards;
+}

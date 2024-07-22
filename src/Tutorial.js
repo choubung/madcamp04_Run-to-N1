@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Rect } from 'react-konva';
 import { loadImage } from './utilities'; // loadImage 함수 임포트
 import { useNavigate } from 'react-router-dom';
+import './App.css'; // CSS 파일 임포트
 
 const Tutorial = ({ width, height }) => {
   const stageRef = useRef(null);
@@ -31,6 +32,8 @@ const Tutorial = ({ width, height }) => {
   const [nextBackgroundX, setNextBackgroundX] = useState(width);
   const [nextBgImage, setNextBgImage] = useState(null);
   const [isBackgroundPause, setIsBackgroundPause] = useState(false);
+  const [isStarting, setIsStarting] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -93,6 +96,7 @@ const Tutorial = ({ width, height }) => {
       });
 
     const bgPaths = [
+      require('./images/bg_black.png'), // 추가된 부분
       require('./images/bg_starting_point.png'),
       require('./images/bg_road.png'),
       require('./images/bg_lake.png'),
@@ -106,6 +110,15 @@ const Tutorial = ({ width, height }) => {
         setBgImages(images);
         setBgImage(images[0]);
         setNextBgImage(images[1]);
+        setTimeout(() => {
+          setFadeOut(true);
+          setTimeout(() => {
+            setIsStarting(false);
+            setBgImage(images[1]); // 첫 번째 실제 배경 이미지로 변경
+            setNextBgImage(images[2]);
+            setBgIndex(1);
+          }, 1000); // fade-out 애니메이션 시간과 일치시키기
+        }, 5000);
       })
       .catch((err) => {
         console.error('Failed to load background images:', err);
@@ -119,7 +132,7 @@ const Tutorial = ({ width, height }) => {
 
   useEffect(() => {
     let interval = setInterval(() => {
-      if (!isGameOver && !isPaused && !isBackgroundPause) {
+      if (!isGameOver && !isPaused && !isBackgroundPause && !isStarting) {
         setBackgroundX((prev) => prev - 5);
         setNextBackgroundX((prev) => prev - 5);
         if (nextBackgroundX <= 0) {
@@ -271,6 +284,7 @@ const Tutorial = ({ width, height }) => {
     nextBackgroundX,
     bgIndex,
     isBackgroundPause,
+    isStarting,
   ]);
 
   const resetGame = () => {
@@ -288,9 +302,9 @@ const Tutorial = ({ width, height }) => {
       width: 38,
       height: 64,
     });
-    setBgIndex(0);
-    setBgImage(bgImages[0]);
-    setNextBgImage(bgImages[1]);
+    setBgIndex(1); // 시작 화면을 건너뛰기 위해 인덱스를 1로 설정
+    setBgImage(bgImages[1]);
+    setNextBgImage(bgImages[2]);
     setBackgroundX(0);
     setNextBackgroundX(width);
   };
@@ -308,10 +322,23 @@ const Tutorial = ({ width, height }) => {
         height: `${height}px`,
       }}
     >
+      {isStarting && (
+        <div
+          className={`fade-out ${fadeOut ? 'fade-out' : ''}`}
+          style={{
+            position: 'absolute',
+            width: `${width}px`,
+            height: `${height}px`,
+            backgroundColor: 'black',
+            zIndex: 10,
+          }}
+        ></div>
+      )}
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
-          <Text text="Cookie Run" fontSize={24} x={10} y={10} />
-
+          {!isStarting && (
+            <Text text="Cookie Run" fontSize={24} x={10} y={10} />
+          )}
           {bgImage && (
             <>
               <KonvaImage
@@ -331,7 +358,7 @@ const Tutorial = ({ width, height }) => {
             </>
           )}
 
-          {characterImages.length > 0 && (
+          {!isStarting && characterImages.length > 0 && (
             <>
               <KonvaImage
                 x={character.x}
@@ -355,57 +382,59 @@ const Tutorial = ({ width, height }) => {
             </>
           )}
 
-          {jellies.map(
-            (jelly, index) =>
-              jellyImage && (
-                <>
-                  <KonvaImage
-                    key={index}
-                    x={jelly.x}
-                    y={jelly.y}
-                    width={jelly.width}
-                    height={jelly.height}
-                    image={jellyImage}
-                  />
-                  {debugMode && (
-                    <Rect
+          {!isStarting &&
+            jellies.map(
+              (jelly, index) =>
+                jellyImage && (
+                  <>
+                    <KonvaImage
+                      key={index}
                       x={jelly.x}
                       y={jelly.y}
                       width={jelly.width}
                       height={jelly.height}
-                      stroke="blue"
-                      strokeWidth={2}
+                      image={jellyImage}
                     />
-                  )}
-                </>
-              )
-          )}
+                    {debugMode && (
+                      <Rect
+                        x={jelly.x}
+                        y={jelly.y}
+                        width={jelly.width}
+                        height={jelly.height}
+                        stroke="blue"
+                        strokeWidth={2}
+                      />
+                    )}
+                  </>
+                )
+            )}
 
-          {obstacles.map(
-            (obstacle, index) =>
-              obstacleImage && (
-                <>
-                  <KonvaImage
-                    key={index}
-                    x={obstacle.x}
-                    y={obstacle.y}
-                    width={obstacle.width}
-                    height={obstacle.height}
-                    image={obstacleImage}
-                  />
-                  {debugMode && (
-                    <Rect
+          {!isStarting &&
+            obstacles.map(
+              (obstacle, index) =>
+                obstacleImage && (
+                  <>
+                    <KonvaImage
+                      key={index}
                       x={obstacle.x}
                       y={obstacle.y}
                       width={obstacle.width}
                       height={obstacle.height}
-                      stroke="green"
-                      strokeWidth={2}
+                      image={obstacleImage}
                     />
-                  )}
-                </>
-              )
-          )}
+                    {debugMode && (
+                      <Rect
+                        x={obstacle.x}
+                        y={obstacle.y}
+                        width={obstacle.width}
+                        height={obstacle.height}
+                        stroke="green"
+                        strokeWidth={2}
+                      />
+                    )}
+                  </>
+                )
+            )}
         </Layer>
       </Stage>
       <div
