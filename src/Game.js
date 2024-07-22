@@ -8,7 +8,7 @@ const Game = ({ width, height }) => {
   const navigate = useNavigate();
   const [character, setCharacter] = useState({
     x: 120,
-    y: height - 115 - 64,
+    y: 290,
     vy: 0,
     isJumping: false,
     frame: 0,
@@ -23,6 +23,9 @@ const Game = ({ width, height }) => {
   const [obstacleImage, setObstacleImage] = useState(null);
   const [characterImages, setCharacterImages] = useState([]);
   const [bgImage, setBgImage] = useState(null);
+  const [bgImages, setBgImages] = useState([]);
+  const [bgIndex, setBgIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const [lastObstacleX, setLastObstacleX] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
 
@@ -30,7 +33,7 @@ const Game = ({ width, height }) => {
   const jumpStrength = -12;
   const maxJumpHeight = jumpStrength ** 2 / (2 * gravity);
 
-  const debugMode = false; // 디버그 모드를 켜려면 true로 설정, 끄려면 false로 설정
+  const debugMode = true;
 
   const handleKeyDown = (e) => {
     if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
@@ -65,7 +68,7 @@ const Game = ({ width, height }) => {
         console.error('Failed to load jelly image:', err);
       });
 
-    loadImage(require('./images/banana.png'))
+    loadImage(require('./images/rubber_cone.png'))
       .then((image) => {
         setObstacleImage(image);
       })
@@ -86,12 +89,23 @@ const Game = ({ width, height }) => {
         console.error('Failed to load character images:', err);
       });
 
-    loadImage(require('./images/bg_starting_point.png'))
-      .then((image) => {
-        setBgImage(image);
+    const bgPaths = [
+      require('./images/bg_starting_point.png'),
+      require('./images/bg_basic.png'),
+      require('./images/bg_lake.png'),
+      require('./images/bg_basic.png'),
+      require('./images/bg_kaimaru.png'),
+      require('./images/bg_mugunghwa.png'),
+      require('./images/bg_n1.png'),
+    ];
+
+    Promise.all(bgPaths.map(loadImage))
+      .then((images) => {
+        setBgImages(images);
+        setBgImage(images[0]);
       })
       .catch((err) => {
-        console.error('Failed to load background image:', err);
+        console.error('Failed to load background images:', err);
       });
   }, []);
 
@@ -101,8 +115,8 @@ const Game = ({ width, height }) => {
   }, [height]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isGameOver) {
+    let interval = setInterval(() => {
+      if (!isGameOver && !isPaused) {
         setBackgroundX((prev) => (prev - 5) % width);
 
         setCharacter((prev) => {
@@ -120,7 +134,7 @@ const Game = ({ width, height }) => {
           return { ...prev, y: newY, vy: newVy, isJumping, frame: newFrame };
         });
 
-        if (Math.random() < 0.033) {
+        if (Math.random() < 0.03) {
           const minY = height - 88 - character.height / 2 - 32;
           const maxY = height - 115 - character.height - maxJumpHeight - 32;
           const jellyY = Math.random() * (maxY - minY) + minY;
@@ -187,6 +201,7 @@ const Game = ({ width, height }) => {
           }
         });
 
+        // 장애물 충돌 체크 주석 처리
         obstacles.forEach((obstacle, index) => {
           if (
             character.x < obstacle.x + obstacle.width &&
@@ -202,7 +217,43 @@ const Game = ({ width, height }) => {
     }, 30);
 
     return () => clearInterval(interval);
-  }, [character, jellies, obstacles, width, height, lastObstacleX, isGameOver]);
+  }, [
+    character,
+    jellies,
+    obstacles,
+    width,
+    height,
+    lastObstacleX,
+    isGameOver,
+    isPaused,
+  ]);
+
+  useEffect(() => {
+    const bgDurations = [0, 30, 15, 30, 15, 30, 0];
+
+    const changeBackground = (index) => {
+      if (index < bgImages.length) {
+        setBgImage(bgImages[index]);
+        if (bgDurations[index] > 0) {
+          if (index % 2 === 2) {
+            // 정지할 시간일 때
+            setIsPaused(true);
+            setTimeout(() => {
+              setIsPaused(false);
+              changeBackground(index + 1);
+            }, bgDurations[index] * 1000);
+          } else {
+            setTimeout(
+              () => changeBackground(index + 1),
+              bgDurations[index] * 1000
+            );
+          }
+        }
+      }
+    };
+
+    changeBackground(0);
+  }, [bgImages]);
 
   const resetGame = () => {
     setIsGameOver(false);
@@ -224,13 +275,7 @@ const Game = ({ width, height }) => {
     navigate('/');
   };
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: `${width}px`,
-        height: `${height}px`,
-      }}
-    >
+    <div className="game">
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
           <Text text="Cookie Run" fontSize={24} x={10} y={10} />
@@ -333,7 +378,7 @@ const Game = ({ width, height }) => {
       </Stage>
       <div
         style={{
-          position: 'absolute',
+          position: 'relative',
           top: 10,
           right: 10,
           fontSize: '24px',

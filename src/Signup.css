@@ -57,15 +57,6 @@
   background-color: #45a049;
 }
 
-/* 캐릭터 애니메이션 */
-.character {
-  width: 50px;
-  height: 50px;
-  background-image: url('./images/runner_0.png');
-  background-size: cover;
-  animation: jump 1s infinite;
-}
-
 @keyframes jump {
   0%,
   100% {

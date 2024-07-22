@@ -16,6 +16,13 @@ const MainHome = () => {
         <Link to="/mypage">
           <button>My Page</button>
         </Link>
+        <Link to="/info">
+          <img
+            src={require('./images/question.png')}
+            alt="Info"
+            className="info-button"
+          />
+        </Link>
       </div>
     </div>
   );

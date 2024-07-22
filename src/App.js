@@ -67,21 +67,70 @@ const App = () => {
         <div className="App">
           <div className="game-container">
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
               <Route
-                path="/game"
+                path="/"
                 element={
-                  <Game
+                  <Home
                     width={gameDimensions.width}
                     height={gameDimensions.height}
                   />
                 }
               />
-              <Route path="/tutorial" element={<Tutorial />} />
-              <Route path="/mainhome" element={<MainHome />} />
-              <Route path="/mypage" element={<Mypage />} />
+              <Route
+                path="/login"
+                element={
+                  <Login
+                    width={gameDimensions.width}
+                    height={gameDimensions.height}
+                  />
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <Signup
+                    width={gameDimensions.width}
+                    height={gameDimensions.height}
+                  />
+                }
+              />
+              <Route
+                path="/game"
+                element={
+                  <Game
+                    className="game-area"
+                    width={gameDimensions.width}
+                    height={gameDimensions.height}
+                  />
+                }
+              />
+              <Route
+                path="/tutorial"
+                element={
+                  <Tutorial
+                    width={gameDimensions.width}
+                    height={gameDimensions.height}
+                  />
+                }
+              />
+              <Route
+                path="/mainhome"
+                element={
+                  <MainHome
+                    width={gameDimensions.width}
+                    height={gameDimensions.height}
+                  />
+                }
+              />
+              <Route
+                path="/mypage"
+                element={
+                  <Mypage
+                    width={gameDimensions.width}
+                    height={gameDimensions.height}
+                  />
+                }
+              />
               <Route path="/info" element={<Info />} />
             </Routes>
           </div>
