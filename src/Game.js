@@ -97,7 +97,6 @@ const Game = ({ width, height }) => {
       require('./images/bg_starting_point.png'),
       require('./images/bg_basic.png'),
       require('./images/bg_lake.png'),
-      require('./images/bg_basic.png'),
       require('./images/bg_kaimaru.png'),
       require('./images/bg_mugunghwa.png'),
       require('./images/bg_n1.png'),
@@ -128,8 +127,11 @@ const Game = ({ width, height }) => {
         if (nextBackgroundX <= 0) {
           if (bgIndex === bgImages.length - 1) {
             setIsGameOver(true);
+            setJellies([]);
+            setObstacles([]);
             return;
           }
+
           setBackgroundX(0);
           setNextBackgroundX(width);
           setBgImage(nextBgImage);
@@ -153,7 +155,7 @@ const Game = ({ width, height }) => {
           return { ...prev, y: newY, vy: newVy, isJumping, frame: newFrame };
         });
 
-        if (Math.random() < 0.03) {
+        if (Math.random() < 0.03 && !isGameOver) {
           const minY = height - 88 - character.height / 2 - 32;
           const maxY = height - 115 - character.height - maxJumpHeight - 32;
           const jellyY = Math.random() * (maxY - minY) + minY;
@@ -169,7 +171,7 @@ const Game = ({ width, height }) => {
           ]);
         }
 
-        if (Math.random() < 0.03) {
+        if (Math.random() < 0.03 && !isGameOver) {
           const minGap = 120;
           const maxGap = 200;
           const gap =
@@ -282,8 +284,6 @@ const Game = ({ width, height }) => {
     >
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
-          <Text text="Cookie Run" fontSize={24} x={10} y={10} />
-
           {bgImage && (
             <>
               <KonvaImage
