@@ -95,7 +95,7 @@ const Game = ({ width, height }) => {
 
     const bgPaths = [
       require('./images/bg_starting_point.png'),
-      require('./images/bg_basic.png'),
+      require('./images/bg_road.png'),
       require('./images/bg_lake.png'),
       require('./images/bg_kaimaru.png'),
       require('./images/bg_mugunghwa.png'),
@@ -222,6 +222,7 @@ const Game = ({ width, height }) => {
           }
         });
 
+        /*
         obstacles.forEach((obstacle, index) => {
           if (
             character.x < obstacle.x + obstacle.width &&
@@ -232,7 +233,7 @@ const Game = ({ width, height }) => {
             setIsGameOver(true);
             alert('Game Over!');
           }
-        });
+        });*/
       }
     }, 30);
 
