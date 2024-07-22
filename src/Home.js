@@ -17,6 +17,13 @@ const Home = () => {
         <Link to="/tutorial">
           <button>Tutorial</button>
         </Link>
+        <Link to="/info">
+          <img
+            src={require('./images/question.png')}
+            alt="Info"
+            className="info-button"
+          />
+        </Link>
       </div>
     </div>
   );

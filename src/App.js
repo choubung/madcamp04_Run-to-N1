@@ -7,6 +7,7 @@ import Game from './Game';
 import Tutorial from './Tutorial';
 import Mypage from './Mypage';
 import MainHome from './MainHome';
+import Info from './Info';
 import { AuthProvider } from './AuthContext';
 import './App.css';
 
@@ -81,6 +82,7 @@ const App = () => {
               <Route path="/tutorial" element={<Tutorial />} />
               <Route path="/mainhome" element={<MainHome />} />
               <Route path="/mypage" element={<Mypage />} />
+              <Route path="/info" element={<Info />} />
             </Routes>
           </div>
         </div>
