@@ -10,7 +10,7 @@ body {
 .info {
   padding: 20px;
   text-align: center;
-  background-image: url('./images/6-3.png');
+  background-image: url('./images/bg_basic.png');
   background-size: cover;
   background-repeat: repeat-x;
   background-position: 0 0;
