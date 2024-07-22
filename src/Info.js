@@ -1,11 +1,17 @@
 import React from 'react';
 import './Info.css';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 
 const Info = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const creators = [
     {
       name: '이수연',
       github: 'https://github.com/choubung',
+      //소속 쓸까 말까
       image: require('./images/profile_suyeon.png'),
     },
     {
@@ -14,6 +20,13 @@ const Info = () => {
       image: require('./images/profile_eunseo.png'),
     },
   ];
+  const goBack = () => {
+    if (user) {
+      navigate('/mainhome');
+    } else {
+      navigate('/');
+    }
+  };
 
   return (
     <div className="info">
@@ -46,6 +59,12 @@ const Info = () => {
           그래서 더 달리고 달렸던 날들 - <em>Youth, 기현</em>
         </p>
       </div>
+
+      <img
+        onClick={goBack}
+        src={require('./images/back_button.png')}
+        className="back-button"
+      />
     </div>
   );
 };
