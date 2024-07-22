@@ -411,15 +411,13 @@ const Tutorial = ({ width, height }) => {
         </Layer>
       </Stage>
       <div
-        style={
-          {
-            //   position: 'absolute',
-            //   top: 10,
-            //   right: 10,
-            //   fontSize: '24px',
-            //   color: 'black',
-          }
-        }
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          fontSize: '24px',
+          color: 'black',
+        }}
       >
         SCORE {score}
       </div>

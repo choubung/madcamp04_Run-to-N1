@@ -28,8 +28,8 @@ const Game = ({ width, height }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [lastObstacleX, setLastObstacleX] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
-  const [nextBackgroundX, setNextBackgroundX] = useState(width);
-  const [nextBgImage, setNextBgImage] = useState(null);
+  const [timer, setTimer] = useState(60); // 타이머 추가
+  const [speed, setSpeed] = useState(5);
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -104,7 +104,6 @@ const Game = ({ width, height }) => {
       .then((images) => {
         setBgImages(images);
         setBgImage(images[0]);
-        setNextBgImage(images[1]);
       })
       .catch((err) => {
         console.error('Failed to load background images:', err);
@@ -119,22 +118,12 @@ const Game = ({ width, height }) => {
   useEffect(() => {
     let interval = setInterval(() => {
       if (!isGameOver && !isPaused) {
-        setBackgroundX((prev) => prev - 5);
-        setNextBackgroundX((prev) => prev - 5);
-        if (nextBackgroundX <= 0) {
-          if (bgIndex === bgImages.length - 1) {
-            setIsGameOver(true);
-            setJellies([]);
-            setObstacles([]);
-            return;
-          }
+        setBackgroundX((prev) => prev - speed);
 
+        // 배경이 화면 끝에 도달하면 다음 배경으로 넘어가도록 설정
+        if (backgroundX <= -width) {
           setBackgroundX(0);
-          setNextBackgroundX(width);
-          setBgImage(nextBgImage);
-          const newIndex = (bgIndex + 1) % bgImages.length;
-          setNextBgImage(bgImages[newIndex]);
-          setBgIndex(newIndex);
+          setBgIndex((prev) => (prev + 1) % bgImages.length);
         }
 
         setCharacter((prev) => {
@@ -153,9 +142,7 @@ const Game = ({ width, height }) => {
         });
 
         if (Math.random() < 0.03) {
-          const minY = height - 88 - character.height / 2 - 32;
-          const maxY = height - 115 - character.height - maxJumpHeight - 32;
-          const jellyY = Math.random() * (maxY - minY) + minY;
+          const jellyY = height - 115 - 32;
 
           setJellies((prev) => [
             ...prev,
@@ -190,13 +177,13 @@ const Game = ({ width, height }) => {
 
         setJellies((prev) =>
           prev
-            .map((jelly) => ({ ...jelly, x: jelly.x - 5 }))
+            .map((jelly) => ({ ...jelly, x: jelly.x - speed }))
             .filter((jelly) => jelly.x > -50)
         );
 
         setObstacles((prev) =>
           prev
-            .map((obstacle) => ({ ...obstacle, x: obstacle.x - 5 }))
+            .map((obstacle) => ({ ...obstacle, x: obstacle.x - speed }))
             .filter((obstacle) => {
               if (obstacle.x > -50) {
                 setLastObstacleX(obstacle.x);
@@ -216,21 +203,22 @@ const Game = ({ width, height }) => {
           ) {
             setJellies((prev) => prev.filter((_, i) => i !== index));
             setScore((prev) => prev + 1);
+            if ((score + 1) % 10 === 0) {
+              setSpeed((prev) => prev + 1);
+            }
           }
         });
 
-        // 장애물 충돌 체크 주석 처리
-        obstacles.forEach((obstacle, index) => {
-          if (
-            character.x < obstacle.x + obstacle.width &&
-            character.x + character.width > obstacle.x &&
-            character.y < obstacle.y + obstacle.height &&
-            character.y + character.height > obstacle.y
-          ) {
-            setIsGameOver(true);
-            // alert('Game Over!');
-          }
-        });
+        // obstacles.forEach((obstacle, index) => {
+        //   if (
+        //     character.x < obstacle.x + obstacle.width &&
+        //     character.x + character.width > obstacle.x &&
+        //     character.y < obstacle.y + obstacle.height &&
+        //     character.y + character.height > obstacle.y
+        //   ) {
+        //     setIsGameOver(true);
+        //   }
+        // });
       }
     }, 30);
 
@@ -245,37 +233,28 @@ const Game = ({ width, height }) => {
     isGameOver,
     isPaused,
     bgImages,
-    nextBgImage,
-    nextBackgroundX,
+    backgroundX,
     bgIndex,
+    speed,
+    score,
   ]);
 
-  // useEffect(() => {
-  //   const bgDurations = [0, 30, 15, 30, 15, 30, 0];
+  useEffect(() => {
+    const timerInterval = setInterval(() => {
+      if (!isGameOver && !isPaused) {
+        setTimer((prev) => {
+          if (prev <= 0) {
+            setIsGameOver(true);
+            clearInterval(timerInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
+    }, 1000);
 
-  //   const changeBackground = (index) => {
-  //     if (index < bgImages.length) {
-  //       setBgImage(bgImages[index]);
-  //       if (bgDurations[index] > 0) {
-  //         if (index % 2 === 2) {
-  //           // 정지할 시간일 때
-  //           setIsPaused(true);
-  //           setTimeout(() => {
-  //             setIsPaused(false);
-  //             changeBackground(index + 1);
-  //           }, bgDurations[index] * 1000);
-  //         } else {
-  //           setTimeout(
-  //             () => changeBackground(index + 1),
-  //             bgDurations[index] * 1000
-  //           );
-  //         }
-  //       }
-  //     }
-  //   };
-
-  //   changeBackground(0);
-  // }, [bgImages]);
+    return () => clearInterval(timerInterval);
+  }, [isGameOver, isPaused]);
 
   const resetGame = () => {
     setIsGameOver(false);
@@ -294,13 +273,15 @@ const Game = ({ width, height }) => {
     });
     setBgIndex(0);
     setBgImage(bgImages[0]);
-    setNextBgImage(bgImages[1]);
     setBackgroundX(0);
-    setNextBackgroundX(width);
+    setTimer(60); // 타이머 리셋
+    setSpeed(5); // 속도 리셋
   };
+
   const goToHome = () => {
     navigate('/');
   };
+
   return (
     <div
       className="game"
@@ -312,8 +293,6 @@ const Game = ({ width, height }) => {
     >
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
-          <Text text="Cookie Run" fontSize={24} x={10} y={10} />
-
           {bgImage && (
             <>
               <KonvaImage
@@ -321,18 +300,17 @@ const Game = ({ width, height }) => {
                 y={0}
                 width={width}
                 height={height}
-                image={bgImage}
+                image={bgImages[bgIndex]}
               />
               <KonvaImage
-                x={nextBackgroundX}
+                x={backgroundX + width}
                 y={0}
                 width={width}
                 height={height}
-                image={nextBgImage}
+                image={bgImages[(bgIndex + 1) % bgImages.length]}
               />
             </>
           )}
-
           {characterImages.length > 0 && (
             <>
               <KonvaImage
@@ -356,7 +334,6 @@ const Game = ({ width, height }) => {
               )}
             </>
           )}
-
           {jellies.map(
             (jelly, index) =>
               jellyImage && (
@@ -382,7 +359,6 @@ const Game = ({ width, height }) => {
                 </>
               )
           )}
-
           {obstacles.map(
             (obstacle, index) =>
               obstacleImage && (
@@ -408,19 +384,17 @@ const Game = ({ width, height }) => {
                 </>
               )
           )}
+          <Rect
+            x={10}
+            y={10}
+            width={(width - 20) * (timer / 60)}
+            height={20}
+            fill="green"
+          />
+          {/* <Text text={`Time: ${timer}`} fontSize={24} x={10} y={35} /> */}
+          <Text text={`Score: ${score}`} fontSize={24} x={10} y={60} />
         </Layer>
       </Stage>
-      <div
-        style={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          fontSize: '24px',
-          color: 'black',
-        }}
-      >
-        SCORE {score}
-      </div>
       {isGameOver && (
         <div className="game-over">
           <button onClick={resetGame}>다시 하기</button>
