@@ -30,12 +30,13 @@ const Tutorial = ({ width, height }) => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [nextBackgroundX, setNextBackgroundX] = useState(width);
   const [nextBgImage, setNextBgImage] = useState(null);
+  const [isBackgroundPause, setIsBackgroundPause] = useState(false);
 
   const gravity = 0.8;
   const jumpStrength = -12;
   const maxJumpHeight = jumpStrength ** 2 / (2 * gravity);
 
-  const debugMode = true;
+  const debugMode = false;
 
   const handleKeyDown = (e) => {
     if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
@@ -118,7 +119,7 @@ const Tutorial = ({ width, height }) => {
 
   useEffect(() => {
     let interval = setInterval(() => {
-      if (!isGameOver && !isPaused) {
+      if (!isGameOver && !isPaused && !isBackgroundPause) {
         setBackgroundX((prev) => prev - 5);
         setNextBackgroundX((prev) => prev - 5);
         if (nextBackgroundX <= 0) {
@@ -126,6 +127,28 @@ const Tutorial = ({ width, height }) => {
             setIsGameOver(true);
             setJellies([]);
             setObstacles([]);
+            return;
+          }
+
+          // 특정 배경일 때 멈추기
+          if (
+            bgIndex === 2 ||
+            bgIndex === 3 ||
+            bgIndex === 4 ||
+            bgIndex === 5
+          ) {
+            setIsBackgroundPause(true);
+            setJellies([]);
+            setObstacles([]);
+            setTimeout(() => {
+              setIsBackgroundPause(false);
+              setBackgroundX(0);
+              setNextBackgroundX(width);
+              setBgImage(nextBgImage);
+              const newIndex = (bgIndex + 1) % bgImages.length;
+              setNextBgImage(bgImages[newIndex]);
+              setBgIndex(newIndex);
+            }, 10000); // 10초 동안 멈춤
             return;
           }
 
@@ -219,7 +242,6 @@ const Tutorial = ({ width, height }) => {
           }
         });
 
-        // 장애물 충돌 체크 주석 처리
         obstacles.forEach((obstacle, index) => {
           if (
             character.x < obstacle.x + obstacle.width &&
@@ -248,34 +270,8 @@ const Tutorial = ({ width, height }) => {
     nextBgImage,
     nextBackgroundX,
     bgIndex,
+    isBackgroundPause,
   ]);
-
-  // useEffect(() => {
-  //   const bgDurations = [0, 30, 15, 30, 15, 30, 0];
-
-  //   const changeBackground = (index) => {
-  //     if (index < bgImages.length) {
-  //       setBgImage(bgImages[index]);
-  //       if (bgDurations[index] > 0) {
-  //         if (index % 2 === 2) {
-  //           // 정지할 시간일 때
-  //           setIsPaused(true);
-  //           setTimeout(() => {
-  //             setIsPaused(false);
-  //             changeBackground(index + 1);
-  //           }, bgDurations[index] * 1000);
-  //         } else {
-  //           setTimeout(
-  //             () => changeBackground(index + 1),
-  //             bgDurations[index] * 1000
-  //           );
-  //         }
-  //       }
-  //     }
-  //   };
-
-  //   changeBackground(0);
-  // }, [bgImages]);
 
   const resetGame = () => {
     setIsGameOver(false);
@@ -298,9 +294,11 @@ const Tutorial = ({ width, height }) => {
     setBackgroundX(0);
     setNextBackgroundX(width);
   };
+
   const goToHome = () => {
     navigate('/');
   };
+
   return (
     <div
       className="game"

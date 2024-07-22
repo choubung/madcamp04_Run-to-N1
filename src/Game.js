@@ -35,7 +35,7 @@ const Game = ({ width, height }) => {
   const jumpStrength = -12;
   const maxJumpHeight = jumpStrength ** 2 / (2 * gravity);
 
-  const debugMode = true;
+  const debugMode = false;
 
   const handleKeyDown = (e) => {
     if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
