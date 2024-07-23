@@ -34,6 +34,9 @@ const Tutorial = ({ width, height }) => {
   const [isBackgroundPause, setIsBackgroundPause] = useState(false);
   const [isStarting, setIsStarting] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
+  const [isInvincible, setIsInvincible] = useState(false);
+  const [enterKeyCount, setEnterKeyCount] = useState(0);
+  const [lastEnterKeyTime, setLastEnterKeyTime] = useState(0);
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -45,8 +48,23 @@ const Tutorial = ({ width, height }) => {
     if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
       setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
     }
-    if (e.key === 'Enter' && isGameOver) {
-      resetGame();
+    if (e.key === 'Enter') {
+      const now = Date.now();
+      if (now - lastEnterKeyTime <= 500) {
+        setEnterKeyCount((prev) => prev + 1);
+      } else {
+        setEnterKeyCount(1);
+      }
+      setLastEnterKeyTime(now);
+
+      if (enterKeyCount + 1 === 3) {
+        setIsInvincible((prev) => !prev);
+        setEnterKeyCount(0);
+      }
+
+      if (isGameOver) {
+        resetGame();
+      }
     }
   };
 
@@ -63,7 +81,7 @@ const Tutorial = ({ width, height }) => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [character.isJumping, isGameOver]);
+  }, [character.isJumping, isGameOver, enterKeyCount, lastEnterKeyTime]);
 
   useEffect(() => {
     loadImage(require('./images/americano.png'))
@@ -253,6 +271,7 @@ const Tutorial = ({ width, height }) => {
 
         obstacles.forEach((obstacle, index) => {
           if (
+            !isInvincible &&
             character.x < obstacle.x + obstacle.width &&
             character.x + character.width > obstacle.x &&
             character.y < obstacle.y + obstacle.height &&
@@ -280,6 +299,7 @@ const Tutorial = ({ width, height }) => {
     bgIndex,
     isBackgroundPause,
     isStarting,
+    isInvincible,
   ]);
 
   const resetGame = () => {
@@ -302,6 +322,8 @@ const Tutorial = ({ width, height }) => {
     setNextBgImage(bgImages[2]);
     setBackgroundX(0);
     setNextBackgroundX(width);
+    setIsInvincible(false); // 무적 모드 해제
+    setEnterKeyCount(0); // 엔터 키 입력 카운트 초기화
   };
 
   const goToHome = () => {
@@ -448,6 +470,19 @@ const Tutorial = ({ width, height }) => {
           <button onClick={resetGame}>다시 하기</button>
           <button onClick={goToHome}>홈으로 가기</button>
           <button>점수 보기</button>
+        </div>
+      )}
+      {isInvincible && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            fontSize: '24px',
+            color: 'red',
+          }}
+        >
+          무적 모드
         </div>
       )}
     </div>
