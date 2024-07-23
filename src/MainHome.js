@@ -1,7 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './MainHome.css';
+import { useAuth } from './AuthContext';
+
 const MainHome = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   return (
     <div className="mainhome">
       <h1>Welcome to Pixel Runner</h1>
@@ -23,6 +32,7 @@ const MainHome = () => {
             className="info-button"
           />
         </Link>
+        <button onClick={handleLogout}>Logout</button>
       </div>
     </div>
   );
