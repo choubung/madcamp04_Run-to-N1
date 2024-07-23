@@ -16,6 +16,16 @@ const Tutorial = ({ width, height }) => {
     width: 38,
     height: 64,
   });
+
+  const [extraCharacterImage, setExtraCharacterImage] = useState(null);
+  const [extraCharacter, setExtraCharacter] = useState({
+    x: width,
+    y: height - 115 - character.height,
+    frame: 0,
+  });
+
+  const [isExtraCharacterVisible, setIsExtraCharacterVisible] = useState(false);
+
   const [jellies, setJellies] = useState([]);
   const [obstacles, setObstacles] = useState([]);
   const [score, setScore] = useState(0);
@@ -97,6 +107,38 @@ const Tutorial = ({ width, height }) => {
   };
 
   useEffect(() => {
+    let extraCharacterInterval;
+    if (showTextboxEvent2) {
+      setIsExtraCharacterVisible(true);
+      setExtraCharacter((prev) => ({ ...prev, x: width }));
+      extraCharacterInterval = setInterval(() => {
+        setExtraCharacter((prev) => {
+          const newX = prev.x - 5;
+          return { ...prev, x: newX };
+        });
+      }, 30);
+
+      setTimeout(() => {
+        clearInterval(extraCharacterInterval);
+        extraCharacterInterval = setInterval(() => {
+          setExtraCharacter((prev) => {
+            const newX = prev.x + 5;
+            if (newX > width) {
+              clearInterval(extraCharacterInterval);
+              setIsExtraCharacterVisible(false);
+            }
+            return { ...prev, x: newX };
+          });
+        }, 30);
+      }, 4000); // 캐릭터가 등장한 후 4초 뒤에 다시 오른쪽으로 이동 시작
+    } else {
+      setIsExtraCharacterVisible(false);
+    }
+
+    return () => clearInterval(extraCharacterInterval);
+  }, [showTextboxEvent2, width]);
+
+  useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('mousedown', handleMouseDown);
     return () => {
@@ -133,6 +175,14 @@ const Tutorial = ({ width, height }) => {
       })
       .catch((err) => {
         console.error('Failed to load character images:', err);
+      });
+
+    loadImage(require('./images/prof_ryu.png'))
+      .then((image) => {
+        setExtraCharacterImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load extra character image:', err);
       });
 
     const bgPaths = [
@@ -457,7 +507,17 @@ const Tutorial = ({ width, height }) => {
               />
             </>
           )}
-
+          {isExtraCharacterVisible && characterImages.length > 0 && (
+            <KonvaImage
+              x={extraCharacter.x}
+              y={extraCharacter.y}
+              width={character.width}
+              height={character.height}
+              image={extraCharacterImage}
+              scaleX={1.5}
+              scaleY={1.5}
+            />
+          )}
           {!isStarting && characterImages.length > 0 && (
             <>
               <KonvaImage
