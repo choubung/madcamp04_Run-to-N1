@@ -35,6 +35,9 @@ const Game = ({ width, height }) => {
   const [timer, setTimer] = useState(60); // 타이머 추가
   const [speed, setSpeed] = useState(5);
   const [userScore, setUserScore] = useState(null);
+  const jumpSound = new Audio('/jump.mp3');
+  const jellySound = new Audio('/jelly.mp3');
+  jellySound.volume = 0.3; // 젤리 소리 볼륨 조절
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -45,6 +48,7 @@ const Game = ({ width, height }) => {
   const handleKeyDown = (e) => {
     if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
       setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
+      jumpSound.play();
     }
     if (e.key === 'Enter' && isGameOver) {
       resetGame();
@@ -208,6 +212,7 @@ const Game = ({ width, height }) => {
           ) {
             setJellies((prev) => prev.filter((_, i) => i !== index));
             setScore((prev) => prev + 1);
+            jellySound.play();
             if ((score + 1) % 10 === 0) {
               setSpeed((prev) => prev + 1);
             }

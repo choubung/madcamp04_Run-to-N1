@@ -11,6 +11,7 @@ import Info from './Info';
 import { AuthProvider } from './AuthContext';
 import Score from './Score'; // 추가
 import './App.css';
+import BackgroundMusic from './BackgroundMusic'; // 배경 음악 컴포넌트 임포트
 
 const App = () => {
   const gameDimensions = {
@@ -66,6 +67,7 @@ const App = () => {
     <AuthProvider>
       <Router>
         <div className="App">
+          <BackgroundMusic /> {/* 배경 음악 컴포넌트 추가 */}
           <div className="game-container">
             <Routes>
               <Route
