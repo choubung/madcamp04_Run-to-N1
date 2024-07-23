@@ -38,9 +38,16 @@ const Tutorial = ({ width, height }) => {
   const [enterKeyCount, setEnterKeyCount] = useState(0);
   const [lastEnterKeyTime, setLastEnterKeyTime] = useState(0);
   const [isGameCompleted, setIsGameCompleted] = useState(false);
-  const [outroImage, setOutroImage] = useState(null);
   const [textboxEvent1, setTextboxEvent1] = useState(null);
+  const [textboxEvent2, setTextboxEvent2] = useState(null);
+  const [textboxEvent3, setTextboxEvent3] = useState(null);
+  const [textboxEnding1, setTextboxEnding1] = useState(null);
+  const [textboxEnding2, setTextboxEnding2] = useState(null); // 추가된 부분
   const [showTextboxEvent1, setShowTextboxEvent1] = useState(false);
+  const [showTextboxEvent2, setShowTextboxEvent2] = useState(false);
+  const [showTextboxEvent3, setShowTextboxEvent3] = useState(false);
+  const [showTextboxEnding1, setShowTextboxEnding1] = useState(false);
+  const [showTextboxEnding2, setShowTextboxEnding2] = useState(false); // 추가된 부분
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -76,6 +83,17 @@ const Tutorial = ({ width, height }) => {
     if (!character.isJumping) {
       setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
     }
+  };
+
+  const handleStageMouseDown = () => {
+    if (showTextboxEnding1) {
+      setShowTextboxEnding1(false);
+      setShowTextboxEnding2(true);
+    }
+  };
+
+  const goToHome = () => {
+    navigate('/');
   };
 
   useEffect(() => {
@@ -118,7 +136,7 @@ const Tutorial = ({ width, height }) => {
       });
 
     const bgPaths = [
-      require('./images/bg_black.png'), // 추가된 부분
+      require('./images/bg_black.png'),
       require('./images/bg_starting_point.png'),
       require('./images/bg_road.png'),
       require('./images/bg_lake.png'),
@@ -136,22 +154,14 @@ const Tutorial = ({ width, height }) => {
           setFadeOut(true);
           setTimeout(() => {
             setIsStarting(false);
-            setBgImage(images[1]); // 첫 번째 실제 배경 이미지로 변경
+            setBgImage(images[1]);
             setNextBgImage(images[2]);
             setBgIndex(1);
-          }, 1000); // fade-out 애니메이션 시간과 일치시키기
+          }, 1000);
         }, 2500);
       })
       .catch((err) => {
         console.error('Failed to load background images:', err);
-      });
-
-    loadImage(require('./images/outro.png'))
-      .then((image) => {
-        setOutroImage(image);
-      })
-      .catch((err) => {
-        console.error('Failed to load outro image:', err);
       });
 
     loadImage(require('./images/textbox_event1.png'))
@@ -160,6 +170,38 @@ const Tutorial = ({ width, height }) => {
       })
       .catch((err) => {
         console.error('Failed to load textbox_event1 image:', err);
+      });
+
+    loadImage(require('./images/textbox_event2.png'))
+      .then((image) => {
+        setTextboxEvent2(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_event2 image:', err);
+      });
+
+    loadImage(require('./images/textbox_event3.png'))
+      .then((image) => {
+        setTextboxEvent3(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_event3 image:', err);
+      });
+
+    loadImage(require('./images/textbox_ending1.png'))
+      .then((image) => {
+        setTextboxEnding1(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_ending1 image:', err);
+      });
+
+    loadImage(require('./images/textbox_ending2.png'))
+      .then((image) => {
+        setTextboxEnding2(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_ending2 image:', err);
       });
   }, []);
 
@@ -184,19 +226,24 @@ const Tutorial = ({ width, height }) => {
             setIsGameCompleted(true);
             setJellies([]);
             setObstacles([]);
+            setShowTextboxEnding1(true);
             return;
           }
 
-          // 특정 배경일 때 멈추기
-          const pauseBackgrounds = [3, 4, 5]; // bg_lake, bg_kaimaru, bg_mugunghwa의 인덱스
+          const pauseBackgrounds = [3, 4, 5];
           if (pauseBackgrounds.includes(bgIndex)) {
             setIsBackgroundPause(true);
             setJellies([]);
             setObstacles([]);
 
-            // Event 1: bg_lake에서 textbox_event1 표시
             if (bgIndex === 3) {
               setShowTextboxEvent1(true);
+            }
+            if (bgIndex === 4) {
+              setShowTextboxEvent2(true);
+            }
+            if (bgIndex === 5) {
+              setShowTextboxEvent3(true);
             }
 
             setTimeout(() => {
@@ -207,8 +254,10 @@ const Tutorial = ({ width, height }) => {
               const newIndex = (bgIndex + 1) % bgImages.length;
               setNextBgImage(bgImages[newIndex]);
               setBgIndex(newIndex);
-              setShowTextboxEvent1(false); // 화면이 다시 흐르기 시작하면 textbox_event1 숨기기
-            }, 8000); // 8초 동안 멈춤
+              setShowTextboxEvent1(false);
+              setShowTextboxEvent2(false);
+              setShowTextboxEvent3(false);
+            }, 8000);
             return;
           }
 
@@ -352,17 +401,15 @@ const Tutorial = ({ width, height }) => {
       width: 38,
       height: 64,
     });
-    setBgIndex(1); // 시작 화면을 건너뛰기 위해 인덱스를 1로 설정
+    setBgIndex(1);
     setBgImage(bgImages[1]);
     setNextBgImage(bgImages[2]);
     setBackgroundX(0);
     setNextBackgroundX(width);
-    setIsInvincible(false); // 무적 모드 해제
-    setEnterKeyCount(0); // 엔터 키 입력 카운트 초기화
-  };
-
-  const goToHome = () => {
-    navigate('/');
+    setIsInvincible(false);
+    setEnterKeyCount(0);
+    setShowTextboxEnding1(false);
+    setShowTextboxEnding2(false);
   };
 
   return (
@@ -373,6 +420,7 @@ const Tutorial = ({ width, height }) => {
         width: `${width}px`,
         height: `${height}px`,
       }}
+      onMouseDown={handleStageMouseDown}
     >
       {isStarting && (
         <div
@@ -520,62 +568,11 @@ const Tutorial = ({ width, height }) => {
           무적 모드
         </div>
       )}
-      {isGameCompleted && outroImage && (
-        <div
-          className="game-completed"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: `${width}px`,
-            height: `${height}px`,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 20,
-          }}
-        >
-          <img
-            src={outroImage.src}
-            alt="Outro"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '50px',
-              textAlign: 'center',
-            }}
-          >
-            <button
-              onClick={goToHome}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'white',
-                fontSize: '24px',
-                cursor: 'pointer',
-                fontFamily: 'NeoDunggeunmo, sans-serif',
-                padding: 0,
-              }}
-            >
-              홈으로 돌아가기
-            </button>
-          </div>
-        </div>
-      )}
       {showTextboxEvent1 && textboxEvent1 && (
         <div
           style={{
             position: 'absolute',
-            top: 'calc(10% + 40px)', // 기존 위치에서 40px 아래로
+            top: 'calc(10% + 40px)',
             left: '50%',
             transform: 'translateX(-50%)',
             height: `${height / 4}px`,
@@ -591,6 +588,109 @@ const Tutorial = ({ width, height }) => {
               width: 'auto',
             }}
           />
+        </div>
+      )}
+      {showTextboxEvent2 && textboxEvent2 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+          }}
+        >
+          <img
+            src={textboxEvent2.src}
+            alt="Textbox Event 2"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+        </div>
+      )}
+      {showTextboxEvent3 && textboxEvent3 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+          }}
+        >
+          <img
+            src={textboxEvent3.src}
+            alt="Textbox Event 3"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+        </div>
+      )}
+      {showTextboxEnding1 && textboxEnding1 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+          }}
+        >
+          <img
+            src={textboxEnding1.src}
+            alt="Textbox Ending 1"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+        </div>
+      )}
+      {showTextboxEnding2 && textboxEnding2 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <img
+            src={textboxEnding2.src}
+            alt="Textbox Ending 2"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+          <div
+            style={{
+              marginTop: '20px', // 여백 추가
+              fontFamily: 'NeoDunggeunmo', // 폰트 설정
+              fontSize: '20px',
+              color: 'black',
+              cursor: 'pointer',
+            }}
+            onClick={goToHome}
+          >
+            홈화면으로 돌아가기
+          </div>
         </div>
       )}
     </div>
