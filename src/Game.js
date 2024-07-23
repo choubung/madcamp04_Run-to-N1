@@ -4,7 +4,7 @@ import { loadImage } from './utilities'; // loadImage 함수 임포트
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
-
+import './Game.css';
 const Game = ({ width, height }) => {
   const stageRef = useRef(null);
   const navigate = useNavigate();
@@ -37,6 +37,11 @@ const Game = ({ width, height }) => {
   const [userScore, setUserScore] = useState(null);
   const jumpSound = new Audio('/jump.mp3');
   const jellySound = new Audio('/jelly.mp3');
+  const obstacleSound = new Audio('/MP_Blast.mp3');
+  const [hearts, setHearts] = useState(3); // 하트 추가
+  const [heartImage, setHeartImage] = useState(null); // 하트 이미지 상태 추가
+  const [invincible, setInvincible] = useState(false); // 무적 모드 상태 추가
+
   jellySound.volume = 0.3; // 젤리 소리 볼륨 조절
 
   const gravity = 0.8;
@@ -58,6 +63,7 @@ const Game = ({ width, height }) => {
   const handleMouseDown = () => {
     if (!character.isJumping) {
       setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
+      jumpSound.play();
     }
   };
 
@@ -85,6 +91,13 @@ const Game = ({ width, height }) => {
       })
       .catch((err) => {
         console.error('Failed to load obstacle image:', err);
+      });
+    loadImage(require('./images/heart.png'))
+      .then((image) => {
+        setHeartImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load heart image:', err);
       });
 
     Promise.all([
@@ -221,12 +234,20 @@ const Game = ({ width, height }) => {
 
         obstacles.forEach((obstacle, index) => {
           if (
+            !invincible &&
             character.x < obstacle.x + obstacle.width &&
             character.x + character.width > obstacle.x &&
             character.y < obstacle.y + obstacle.height &&
             character.y + character.height > obstacle.y
           ) {
-            setIsGameOver(true);
+            setHearts((prev) => prev - 1); // 장애물에 닿으면 하트 감소
+            obstacleSound.play();
+            if (hearts <= 1) {
+              setIsGameOver(true);
+            }
+            setInvincible(true);
+            setTimeout(() => setInvincible(false), 1000); // 1초간 무적 모드
+            // setObstacles((prev) => prev.filter((_, i) => i !== index)); // 충돌 후 장애물 제거
           }
         });
       }
@@ -247,24 +268,26 @@ const Game = ({ width, height }) => {
     bgIndex,
     speed,
     score,
+    hearts, // 하트 상태 추가
+    invincible,
   ]);
 
-  useEffect(() => {
-    const timerInterval = setInterval(() => {
-      if (!isGameOver && !isPaused) {
-        setTimer((prev) => {
-          if (prev <= 0) {
-            setIsGameOver(true);
-            clearInterval(timerInterval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }
-    }, 1000);
+  // useEffect(() => {
+  //   const timerInterval = setInterval(() => {
+  //     if (!isGameOver && !isPaused) {
+  //       setTimer((prev) => {
+  //         if (prev <= 0) {
+  //           setIsGameOver(true);
+  //           clearInterval(timerInterval);
+  //           return 0;
+  //         }
+  //         return prev - 1;
+  //       });
+  //     }
+  //   }, 1000);
 
-    return () => clearInterval(timerInterval);
-  }, [isGameOver, isPaused]);
+  //   return () => clearInterval(timerInterval);
+  // }, [isGameOver, isPaused]);
 
   const updateScore = async () => {
     if (user) {
@@ -311,7 +334,8 @@ const Game = ({ width, height }) => {
     setBgIndex(0);
     setBgImage(bgImages[0]);
     setBackgroundX(0);
-    setTimer(60); // 타이머 리셋
+    // setTimer(60); // 타이머 리셋
+    setHearts(3); // 하트 리셋
     setSpeed(5); // 속도 리셋
   };
 
@@ -421,19 +445,30 @@ const Game = ({ width, height }) => {
                 </>
               )
           )}
-          <Rect
+          {/* <Rect
             x={10}
             y={10}
             width={(width - 20) * (timer / 60)}
             height={20}
             fill="green"
-          />
+          /> */}
+          {[...Array(hearts)].map((_, index) => (
+            <KonvaImage
+              key={index}
+              x={10 + index * 30}
+              y={10}
+              width={25}
+              height={25}
+              image={heartImage}
+            />
+          ))}
           {/* <Text text={`Time: ${timer}`} fontSize={24} x={10} y={35} /> */}
           <Text
+            className="scoretext"
             text={`Score: ${score}`}
             fontSize={24}
-            x={10}
-            y={60}
+            x={width - 150} // width 값을 이용하여 오른쪽에 배치
+            y={10} // top 값을 이용하여 위쪽에 배치
             fontFamily="NeoDunggeunmo"
           />
         </Layer>
