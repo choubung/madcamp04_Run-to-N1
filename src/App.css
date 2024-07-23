@@ -187,7 +187,7 @@ body {
   cursor: pointer;
 } */
 
-.home,
+/* .home,
 .login,
 .signup,
 .tutorial,
@@ -200,13 +200,12 @@ body {
   width: 1014px;
   height: 596px;
   /* max-width: 400px; */
-  /* margin: 20px auto; */
-  padding: 20px;
+/* margin: 20px auto; */
+/* padding: 20px;
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  position: relative;
-}
+  position: relative; */
 
 input {
   display: block;

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Rect } from 'react-konva';
 import { loadImage } from './utilities'; // loadImage 함수 임포트
 import { useNavigate } from 'react-router-dom';
@@ -35,14 +35,52 @@ const Game = ({ width, height }) => {
   const [timer, setTimer] = useState(60); // 타이머 추가
   const [speed, setSpeed] = useState(5);
   const [userScore, setUserScore] = useState(null);
-  const jumpSound = new Audio('/jump.mp3');
-  const jellySound = new Audio('/jelly.mp3');
-  const obstacleSound = new Audio('/MP_Blast.mp3');
+  // const jumpSound = new Audio('/jump.mp3');
+  //const jellySound = new Audio('/jelly.mp3');
+  //const obstacleSound = new Audio('/MP_Blast.mp3');
   const [hearts, setHearts] = useState(3); // 하트 추가
   const [heartImage, setHeartImage] = useState(null); // 하트 이미지 상태 추가
   const [invincible, setInvincible] = useState(false); // 무적 모드 상태 추가
 
-  jellySound.volume = 0.3; // 젤리 소리 볼륨 조절
+  //jellySound.volume = 0.3; // 젤리 소리 볼륨 조절
+
+  // 오디오 객체들을 미리 생성
+  const jumpSoundRef = useRef(null);
+  const jellySoundRef = useRef(null);
+  const backgroundMusicRef = useRef(null);
+
+  useEffect(() => {
+    jumpSoundRef.current = new Audio('/jump.mp3');
+    jellySoundRef.current = new Audio('/jelly.mp3');
+    backgroundMusicRef.current = new Audio('/background.mp3');
+
+    const jumpSound = jumpSoundRef.current;
+    const jellySound = jellySoundRef.current;
+    const backgroundMusic = backgroundMusicRef.current;
+
+    jumpSound.volume = 1.0;
+    jellySound.volume = 0.3; // 젤리 소리 볼륨 조절
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = 0.3;
+    backgroundMusic
+      .play()
+      .catch((error) =>
+        console.error('Failed to play background music:', error)
+      );
+
+    return () => {
+      jumpSound.pause();
+      jellySound.pause();
+      backgroundMusic.pause();
+    };
+  }, []);
+
+  const playSound = (sound) => {
+    sound.currentTime = 0; // 오디오 재생을 처음부터 시작
+    sound
+      .play()
+      .catch((error) => console.error('Failed to play sound:', error));
+  };
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -50,22 +88,29 @@ const Game = ({ width, height }) => {
 
   const debugMode = false;
 
-  const handleKeyDown = (e) => {
-    if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
-      setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
-      jumpSound.play();
-    }
-    if (e.key === 'Enter' && isGameOver) {
-      resetGame();
-    }
-  };
+  const handleKeyDown = useCallback(
+    (e) => {
+      if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
+        setCharacter((prev) => ({
+          ...prev,
+          vy: jumpStrength,
+          isJumping: true,
+        }));
+        playSound(jumpSoundRef.current); // 오디오 재생
+      }
+      if (e.key === 'Enter' && isGameOver) {
+        resetGame();
+      }
+    },
+    [character.isJumping, isGameOver]
+  );
 
-  const handleMouseDown = () => {
+  const handleMouseDown = useCallback(() => {
     if (!character.isJumping) {
       setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
-      jumpSound.play();
+      playSound(jumpSoundRef.current); // 오디오 재생
     }
-  };
+  }, [character.isJumping]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -74,7 +119,7 @@ const Game = ({ width, height }) => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [character.isJumping, isGameOver]);
+  }, [handleKeyDown, handleMouseDown]);
 
   useEffect(() => {
     loadImage(require('./images/americano.png'))
@@ -225,7 +270,8 @@ const Game = ({ width, height }) => {
           ) {
             setJellies((prev) => prev.filter((_, i) => i !== index));
             setScore((prev) => prev + 1);
-            jellySound.play();
+            //  jellySound.play();
+            playSound(jellySoundRef.current); // 오디오 재생
             if ((score + 1) % 10 === 0) {
               setSpeed((prev) => prev + 1);
             }
@@ -241,7 +287,7 @@ const Game = ({ width, height }) => {
             character.y + character.height > obstacle.y
           ) {
             setHearts((prev) => prev - 1); // 장애물에 닿으면 하트 감소
-            obstacleSound.play();
+            //obstacleSound.play();
             if (hearts <= 1) {
               setIsGameOver(true);
             }
@@ -340,17 +386,17 @@ const Game = ({ width, height }) => {
   };
 
   const goToHome = () => {
-    navigate('/');
+    navigate('/mainhome');
   };
 
   return (
     <div
       className="game"
-      style={{
-        position: 'relative',
-        width: `${width}px`,
-        height: `${height}px`,
-      }}
+      // style={{
+      //   position: 'relative',
+      //   width: `${width}px`,
+      //   height: `${height}px`,
+      // }}
     >
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
