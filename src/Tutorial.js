@@ -351,17 +351,17 @@ const Tutorial = ({ width, height }) => {
           }
         });
 
-        obstacles.forEach((obstacle, index) => {
-          if (
-            !isInvincible &&
-            character.x < obstacle.x + obstacle.width &&
-            character.x + character.width > obstacle.x &&
-            character.y < obstacle.y + obstacle.height &&
-            character.y + character.height > obstacle.y
-          ) {
-            setIsGameOver(true);
-          }
-        });
+        // obstacles.forEach((obstacle, index) => {
+        //   if (
+        //     !isInvincible &&
+        //     character.x < obstacle.x + obstacle.width &&
+        //     character.x + character.width > obstacle.x &&
+        //     character.y < obstacle.y + obstacle.height &&
+        //     character.y + character.height > obstacle.y
+        //   ) {
+        //     setIsGameOver(true);
+        //   }
+        // });
       }
     }, 30);
 
