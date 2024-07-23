@@ -37,6 +37,8 @@ const Tutorial = ({ width, height }) => {
   const [isInvincible, setIsInvincible] = useState(false);
   const [enterKeyCount, setEnterKeyCount] = useState(0);
   const [lastEnterKeyTime, setLastEnterKeyTime] = useState(0);
+  const [isGameCompleted, setIsGameCompleted] = useState(false);
+  const [outroImage, setOutroImage] = useState(null);
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -141,6 +143,14 @@ const Tutorial = ({ width, height }) => {
       .catch((err) => {
         console.error('Failed to load background images:', err);
       });
+
+    loadImage(require('./images/outro.png'))
+      .then((image) => {
+        setOutroImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load outro image:', err);
+      });
   }, []);
 
   useEffect(() => {
@@ -150,12 +160,18 @@ const Tutorial = ({ width, height }) => {
 
   useEffect(() => {
     let interval = setInterval(() => {
-      if (!isGameOver && !isPaused && !isBackgroundPause && !isStarting) {
+      if (
+        !isGameOver &&
+        !isPaused &&
+        !isBackgroundPause &&
+        !isStarting &&
+        !isGameCompleted
+      ) {
         setBackgroundX((prev) => prev - 5);
         setNextBackgroundX((prev) => prev - 5);
         if (nextBackgroundX <= 0) {
           if (bgIndex === bgImages.length - 1) {
-            setIsGameOver(true);
+            setIsGameCompleted(true);
             setJellies([]);
             setObstacles([]);
             return;
@@ -175,7 +191,7 @@ const Tutorial = ({ width, height }) => {
               const newIndex = (bgIndex + 1) % bgImages.length;
               setNextBgImage(bgImages[newIndex]);
               setBgIndex(newIndex);
-            }, 10000); // 10초 동안 멈춤
+            }, 8000); // 8초 동안 멈춤
             return;
           }
 
@@ -300,10 +316,12 @@ const Tutorial = ({ width, height }) => {
     isBackgroundPause,
     isStarting,
     isInvincible,
+    isGameCompleted,
   ]);
 
   const resetGame = () => {
     setIsGameOver(false);
+    setIsGameCompleted(false);
     setScore(0);
     setJellies([]);
     setObstacles([]);
@@ -483,6 +501,57 @@ const Tutorial = ({ width, height }) => {
           }}
         >
           무적 모드
+        </div>
+      )}
+      {isGameCompleted && outroImage && (
+        <div
+          className="game-completed"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: `${width}px`,
+            height: `${height}px`,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 20,
+          }}
+        >
+          <img
+            src={outroImage.src}
+            alt="Outro"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '50px',
+              textAlign: 'center',
+            }}
+          >
+            <button
+              onClick={goToHome}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontSize: '24px',
+                cursor: 'pointer',
+                fontFamily: 'NeoDunggeunmo, sans-serif',
+                padding: 0,
+              }}
+            >
+              홈으로 돌아가기
+            </button>
+          </div>
         </div>
       )}
     </div>
