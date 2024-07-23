@@ -49,7 +49,8 @@ body {
 .mainhome,
 .game,
 .tutorial,
-.info {
+.info,
+.score {
   min-width: 1014px;
   min-height: 596px;
   width: 1014px;

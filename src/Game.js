@@ -2,10 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Rect } from 'react-konva';
 import { loadImage } from './utilities'; // loadImage 함수 임포트
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from './AuthContext';
 
 const Game = ({ width, height }) => {
   const stageRef = useRef(null);
   const navigate = useNavigate();
+  const { user } = useAuth(); // 로그인한 사용자 정보 가져오기
+
   const [character, setCharacter] = useState({
     x: 120,
     y: 290,
@@ -30,6 +34,7 @@ const Game = ({ width, height }) => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [timer, setTimer] = useState(60); // 타이머 추가
   const [speed, setSpeed] = useState(5);
+  const [userScore, setUserScore] = useState(null);
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -209,16 +214,16 @@ const Game = ({ width, height }) => {
           }
         });
 
-        // obstacles.forEach((obstacle, index) => {
-        //   if (
-        //     character.x < obstacle.x + obstacle.width &&
-        //     character.x + character.width > obstacle.x &&
-        //     character.y < obstacle.y + obstacle.height &&
-        //     character.y + character.height > obstacle.y
-        //   ) {
-        //     setIsGameOver(true);
-        //   }
-        // });
+        obstacles.forEach((obstacle, index) => {
+          if (
+            character.x < obstacle.x + obstacle.width &&
+            character.x + character.width > obstacle.x &&
+            character.y < obstacle.y + obstacle.height &&
+            character.y + character.height > obstacle.y
+          ) {
+            setIsGameOver(true);
+          }
+        });
       }
     }, 30);
 
@@ -255,6 +260,33 @@ const Game = ({ width, height }) => {
 
     return () => clearInterval(timerInterval);
   }, [isGameOver, isPaused]);
+
+  const updateScore = async () => {
+    if (user) {
+      try {
+        const response = await axios.post(
+          'http://ec2-3-34-49-232.ap-northeast-2.compute.amazonaws.com:2000/update-score',
+          {
+            userid: user.userid,
+            score,
+          }
+        );
+        setUserScore(response.data.score);
+        console.log(response.data.message);
+      } catch (error) {
+        console.error('Error updating score:', error);
+      }
+    }
+  };
+  useEffect(() => {
+    if (isGameOver) {
+      updateScore();
+    }
+  }, [isGameOver]);
+
+  const goToScorePage = () => {
+    navigate('/score', { state: { currentScore: score } });
+  };
 
   const resetGame = () => {
     setIsGameOver(false);
@@ -392,14 +424,21 @@ const Game = ({ width, height }) => {
             fill="green"
           />
           {/* <Text text={`Time: ${timer}`} fontSize={24} x={10} y={35} /> */}
-          <Text text={`Score: ${score}`} fontSize={24} x={10} y={60} />
+          <Text
+            text={`Score: ${score}`}
+            fontSize={24}
+            x={10}
+            y={60}
+            fontFamily="NeoDunggeunmo"
+          />
         </Layer>
       </Stage>
       {isGameOver && (
         <div className="game-over">
           <button onClick={resetGame}>다시 하기</button>
           <button onClick={goToHome}>홈으로 가기</button>
-          <button>점수 보기</button>
+          {/* <button>점수 보기</button> */}
+          <button onClick={goToScorePage}>점수 보기</button>
         </div>
       )}
     </div>

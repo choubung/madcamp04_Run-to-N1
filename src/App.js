@@ -9,6 +9,7 @@ import Mypage from './Mypage';
 import MainHome from './MainHome';
 import Info from './Info';
 import { AuthProvider } from './AuthContext';
+import Score from './Score'; // 추가
 import './App.css';
 
 const App = () => {
@@ -132,6 +133,7 @@ const App = () => {
                 }
               />
               <Route path="/info" element={<Info />} />
+              <Route path="/score" element={<Score />} /> {/* 추가 */}
             </Routes>
           </div>
         </div>
