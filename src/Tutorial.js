@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Rect } from 'react-konva';
 import { loadImage } from './utilities'; // loadImage 함수 임포트
 import { useNavigate } from 'react-router-dom';
+import './App.css'; // CSS 파일 임포트
 
 const Tutorial = ({ width, height }) => {
   const stageRef = useRef(null);
@@ -30,19 +31,51 @@ const Tutorial = ({ width, height }) => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [nextBackgroundX, setNextBackgroundX] = useState(width);
   const [nextBgImage, setNextBgImage] = useState(null);
+  const [isBackgroundPause, setIsBackgroundPause] = useState(false);
+  const [isStarting, setIsStarting] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
+  const [isInvincible, setIsInvincible] = useState(false);
+  const [enterKeyCount, setEnterKeyCount] = useState(0);
+  const [lastEnterKeyTime, setLastEnterKeyTime] = useState(0);
+  const [isGameCompleted, setIsGameCompleted] = useState(false);
+  const [textboxEvent1, setTextboxEvent1] = useState(null);
+  const [textboxEvent2, setTextboxEvent2] = useState(null);
+  const [textboxEvent3, setTextboxEvent3] = useState(null);
+  const [textboxEnding1, setTextboxEnding1] = useState(null);
+  const [textboxEnding2, setTextboxEnding2] = useState(null); // 추가된 부분
+  const [showTextboxEvent1, setShowTextboxEvent1] = useState(false);
+  const [showTextboxEvent2, setShowTextboxEvent2] = useState(false);
+  const [showTextboxEvent3, setShowTextboxEvent3] = useState(false);
+  const [showTextboxEnding1, setShowTextboxEnding1] = useState(false);
+  const [showTextboxEnding2, setShowTextboxEnding2] = useState(false); // 추가된 부분
 
   const gravity = 0.8;
   const jumpStrength = -12;
   const maxJumpHeight = jumpStrength ** 2 / (2 * gravity);
 
-  const debugMode = true;
+  const debugMode = false;
 
   const handleKeyDown = (e) => {
     if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
       setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
     }
-    if (e.key === 'Enter' && isGameOver) {
-      resetGame();
+    if (e.key === 'Enter') {
+      const now = Date.now();
+      if (now - lastEnterKeyTime <= 500) {
+        setEnterKeyCount((prev) => prev + 1);
+      } else {
+        setEnterKeyCount(1);
+      }
+      setLastEnterKeyTime(now);
+
+      if (enterKeyCount + 1 === 3) {
+        setIsInvincible((prev) => !prev);
+        setEnterKeyCount(0);
+      }
+
+      if (isGameOver) {
+        resetGame();
+      }
     }
   };
 
@@ -52,6 +85,17 @@ const Tutorial = ({ width, height }) => {
     }
   };
 
+  const handleStageMouseDown = () => {
+    if (showTextboxEnding1) {
+      setShowTextboxEnding1(false);
+      setShowTextboxEnding2(true);
+    }
+  };
+
+  const goToHome = () => {
+    navigate('/');
+  };
+
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('mousedown', handleMouseDown);
@@ -59,7 +103,7 @@ const Tutorial = ({ width, height }) => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [character.isJumping, isGameOver]);
+  }, [character.isJumping, isGameOver, enterKeyCount, lastEnterKeyTime]);
 
   useEffect(() => {
     loadImage(require('./images/americano.png'))
@@ -92,6 +136,7 @@ const Tutorial = ({ width, height }) => {
       });
 
     const bgPaths = [
+      require('./images/bg_black.png'),
       require('./images/bg_starting_point.png'),
       require('./images/bg_road.png'),
       require('./images/bg_lake.png'),
@@ -105,9 +150,58 @@ const Tutorial = ({ width, height }) => {
         setBgImages(images);
         setBgImage(images[0]);
         setNextBgImage(images[1]);
+        setTimeout(() => {
+          setFadeOut(true);
+          setTimeout(() => {
+            setIsStarting(false);
+            setBgImage(images[1]);
+            setNextBgImage(images[2]);
+            setBgIndex(1);
+          }, 1000);
+        }, 2500);
       })
       .catch((err) => {
         console.error('Failed to load background images:', err);
+      });
+
+    loadImage(require('./images/textbox_event1.png'))
+      .then((image) => {
+        setTextboxEvent1(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_event1 image:', err);
+      });
+
+    loadImage(require('./images/textbox_event2.png'))
+      .then((image) => {
+        setTextboxEvent2(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_event2 image:', err);
+      });
+
+    loadImage(require('./images/textbox_event3.png'))
+      .then((image) => {
+        setTextboxEvent3(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_event3 image:', err);
+      });
+
+    loadImage(require('./images/textbox_ending1.png'))
+      .then((image) => {
+        setTextboxEnding1(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_ending1 image:', err);
+      });
+
+    loadImage(require('./images/textbox_ending2.png'))
+      .then((image) => {
+        setTextboxEnding2(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_ending2 image:', err);
       });
   }, []);
 
@@ -118,14 +212,52 @@ const Tutorial = ({ width, height }) => {
 
   useEffect(() => {
     let interval = setInterval(() => {
-      if (!isGameOver && !isPaused) {
+      if (
+        !isGameOver &&
+        !isPaused &&
+        !isBackgroundPause &&
+        !isStarting &&
+        !isGameCompleted
+      ) {
         setBackgroundX((prev) => prev - 5);
         setNextBackgroundX((prev) => prev - 5);
         if (nextBackgroundX <= 0) {
           if (bgIndex === bgImages.length - 1) {
-            setIsGameOver(true);
+            setIsGameCompleted(true);
             setJellies([]);
             setObstacles([]);
+            setShowTextboxEnding1(true);
+            return;
+          }
+
+          const pauseBackgrounds = [3, 4, 5];
+          if (pauseBackgrounds.includes(bgIndex)) {
+            setIsBackgroundPause(true);
+            setJellies([]);
+            setObstacles([]);
+
+            if (bgIndex === 3) {
+              setShowTextboxEvent1(true);
+            }
+            if (bgIndex === 4) {
+              setShowTextboxEvent2(true);
+            }
+            if (bgIndex === 5) {
+              setShowTextboxEvent3(true);
+            }
+
+            setTimeout(() => {
+              setIsBackgroundPause(false);
+              setBackgroundX(0);
+              setNextBackgroundX(width);
+              setBgImage(nextBgImage);
+              const newIndex = (bgIndex + 1) % bgImages.length;
+              setNextBgImage(bgImages[newIndex]);
+              setBgIndex(newIndex);
+              setShowTextboxEvent1(false);
+              setShowTextboxEvent2(false);
+              setShowTextboxEvent3(false);
+            }, 8000);
             return;
           }
 
@@ -219,16 +351,15 @@ const Tutorial = ({ width, height }) => {
           }
         });
 
-        // 장애물 충돌 체크 주석 처리
         obstacles.forEach((obstacle, index) => {
           if (
+            !isInvincible &&
             character.x < obstacle.x + obstacle.width &&
             character.x + character.width > obstacle.x &&
             character.y < obstacle.y + obstacle.height &&
             character.y + character.height > obstacle.y
           ) {
             setIsGameOver(true);
-            // alert('Game Over!');
           }
         });
       }
@@ -248,37 +379,15 @@ const Tutorial = ({ width, height }) => {
     nextBgImage,
     nextBackgroundX,
     bgIndex,
+    isBackgroundPause,
+    isStarting,
+    isInvincible,
+    isGameCompleted,
   ]);
-
-  // useEffect(() => {
-  //   const bgDurations = [0, 30, 15, 30, 15, 30, 0];
-
-  //   const changeBackground = (index) => {
-  //     if (index < bgImages.length) {
-  //       setBgImage(bgImages[index]);
-  //       if (bgDurations[index] > 0) {
-  //         if (index % 2 === 2) {
-  //           // 정지할 시간일 때
-  //           setIsPaused(true);
-  //           setTimeout(() => {
-  //             setIsPaused(false);
-  //             changeBackground(index + 1);
-  //           }, bgDurations[index] * 1000);
-  //         } else {
-  //           setTimeout(
-  //             () => changeBackground(index + 1),
-  //             bgDurations[index] * 1000
-  //           );
-  //         }
-  //       }
-  //     }
-  //   };
-
-  //   changeBackground(0);
-  // }, [bgImages]);
 
   const resetGame = () => {
     setIsGameOver(false);
+    setIsGameCompleted(false);
     setScore(0);
     setJellies([]);
     setObstacles([]);
@@ -292,15 +401,17 @@ const Tutorial = ({ width, height }) => {
       width: 38,
       height: 64,
     });
-    setBgIndex(0);
-    setBgImage(bgImages[0]);
-    setNextBgImage(bgImages[1]);
+    setBgIndex(1);
+    setBgImage(bgImages[1]);
+    setNextBgImage(bgImages[2]);
     setBackgroundX(0);
     setNextBackgroundX(width);
+    setIsInvincible(false);
+    setEnterKeyCount(0);
+    setShowTextboxEnding1(false);
+    setShowTextboxEnding2(false);
   };
-  const goToHome = () => {
-    navigate('/');
-  };
+
   return (
     <div
       className="game"
@@ -309,11 +420,25 @@ const Tutorial = ({ width, height }) => {
         width: `${width}px`,
         height: `${height}px`,
       }}
+      onMouseDown={handleStageMouseDown}
     >
+      {isStarting && (
+        <div
+          className={`fade-out ${fadeOut ? 'fade-out' : ''}`}
+          style={{
+            position: 'absolute',
+            width: `${width}px`,
+            height: `${height}px`,
+            backgroundColor: 'black',
+            zIndex: 10,
+          }}
+        ></div>
+      )}
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
-          <Text text="Cookie Run" fontSize={24} x={10} y={10} />
-
+          {!isStarting && (
+            <Text text="Cookie Run" fontSize={24} x={10} y={10} />
+          )}
           {bgImage && (
             <>
               <KonvaImage
@@ -333,7 +458,7 @@ const Tutorial = ({ width, height }) => {
             </>
           )}
 
-          {characterImages.length > 0 && (
+          {!isStarting && characterImages.length > 0 && (
             <>
               <KonvaImage
                 x={character.x}
@@ -357,57 +482,59 @@ const Tutorial = ({ width, height }) => {
             </>
           )}
 
-          {jellies.map(
-            (jelly, index) =>
-              jellyImage && (
-                <>
-                  <KonvaImage
-                    key={index}
-                    x={jelly.x}
-                    y={jelly.y}
-                    width={jelly.width}
-                    height={jelly.height}
-                    image={jellyImage}
-                  />
-                  {debugMode && (
-                    <Rect
+          {!isStarting &&
+            jellies.map(
+              (jelly, index) =>
+                jellyImage && (
+                  <>
+                    <KonvaImage
+                      key={index}
                       x={jelly.x}
                       y={jelly.y}
                       width={jelly.width}
                       height={jelly.height}
-                      stroke="blue"
-                      strokeWidth={2}
+                      image={jellyImage}
                     />
-                  )}
-                </>
-              )
-          )}
+                    {debugMode && (
+                      <Rect
+                        x={jelly.x}
+                        y={jelly.y}
+                        width={jelly.width}
+                        height={jelly.height}
+                        stroke="blue"
+                        strokeWidth={2}
+                      />
+                    )}
+                  </>
+                )
+            )}
 
-          {obstacles.map(
-            (obstacle, index) =>
-              obstacleImage && (
-                <>
-                  <KonvaImage
-                    key={index}
-                    x={obstacle.x}
-                    y={obstacle.y}
-                    width={obstacle.width}
-                    height={obstacle.height}
-                    image={obstacleImage}
-                  />
-                  {debugMode && (
-                    <Rect
+          {!isStarting &&
+            obstacles.map(
+              (obstacle, index) =>
+                obstacleImage && (
+                  <>
+                    <KonvaImage
+                      key={index}
                       x={obstacle.x}
                       y={obstacle.y}
                       width={obstacle.width}
                       height={obstacle.height}
-                      stroke="green"
-                      strokeWidth={2}
+                      image={obstacleImage}
                     />
-                  )}
-                </>
-              )
-          )}
+                    {debugMode && (
+                      <Rect
+                        x={obstacle.x}
+                        y={obstacle.y}
+                        width={obstacle.width}
+                        height={obstacle.height}
+                        stroke="green"
+                        strokeWidth={2}
+                      />
+                    )}
+                  </>
+                )
+            )}
         </Layer>
       </Stage>
       <div
@@ -426,6 +553,144 @@ const Tutorial = ({ width, height }) => {
           <button onClick={resetGame}>다시 하기</button>
           <button onClick={goToHome}>홈으로 가기</button>
           <button>점수 보기</button>
+        </div>
+      )}
+      {isInvincible && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            fontSize: '24px',
+            color: 'red',
+          }}
+        >
+          무적 모드
+        </div>
+      )}
+      {showTextboxEvent1 && textboxEvent1 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+          }}
+        >
+          <img
+            src={textboxEvent1.src}
+            alt="Textbox Event 1"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+        </div>
+      )}
+      {showTextboxEvent2 && textboxEvent2 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+          }}
+        >
+          <img
+            src={textboxEvent2.src}
+            alt="Textbox Event 2"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+        </div>
+      )}
+      {showTextboxEvent3 && textboxEvent3 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+          }}
+        >
+          <img
+            src={textboxEvent3.src}
+            alt="Textbox Event 3"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+        </div>
+      )}
+      {showTextboxEnding1 && textboxEnding1 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+          }}
+        >
+          <img
+            src={textboxEnding1.src}
+            alt="Textbox Ending 1"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+        </div>
+      )}
+      {showTextboxEnding2 && textboxEnding2 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <img
+            src={textboxEnding2.src}
+            alt="Textbox Ending 2"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+          <div
+            style={{
+              marginTop: '20px', // 여백 추가
+              fontFamily: 'NeoDunggeunmo', // 폰트 설정
+              fontSize: '20px',
+              color: 'black',
+              cursor: 'pointer',
+            }}
+            onClick={goToHome}
+          >
+            홈화면으로 돌아가기
+          </div>
         </div>
       )}
     </div>

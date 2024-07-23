@@ -54,8 +54,8 @@ const App = () => {
     //       <div
     //         className="game-area"
     //         style={{
-    //           width: `${gameDimensions.width}px`,
-    //           height: `${gameDimensions.height}px`,
+    //           width: ${gameDimensions.width}px,
+    //           height: ${gameDimensions.height}px,
     //         }}
     //       >
     //         <Game width={gameDimensions.width} height={gameDimensions.height} />
