@@ -39,6 +39,8 @@ const Tutorial = ({ width, height }) => {
   const [lastEnterKeyTime, setLastEnterKeyTime] = useState(0);
   const [isGameCompleted, setIsGameCompleted] = useState(false);
   const [outroImage, setOutroImage] = useState(null);
+  const [textboxEvent1, setTextboxEvent1] = useState(null);
+  const [showTextboxEvent1, setShowTextboxEvent1] = useState(false);
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -151,6 +153,14 @@ const Tutorial = ({ width, height }) => {
       .catch((err) => {
         console.error('Failed to load outro image:', err);
       });
+
+    loadImage(require('./images/textbox_event1.png'))
+      .then((image) => {
+        setTextboxEvent1(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load textbox_event1 image:', err);
+      });
   }, []);
 
   useEffect(() => {
@@ -183,6 +193,12 @@ const Tutorial = ({ width, height }) => {
             setIsBackgroundPause(true);
             setJellies([]);
             setObstacles([]);
+
+            // Event 1: bg_lake에서 textbox_event1 표시
+            if (bgIndex === 3) {
+              setShowTextboxEvent1(true);
+            }
+
             setTimeout(() => {
               setIsBackgroundPause(false);
               setBackgroundX(0);
@@ -191,6 +207,7 @@ const Tutorial = ({ width, height }) => {
               const newIndex = (bgIndex + 1) % bgImages.length;
               setNextBgImage(bgImages[newIndex]);
               setBgIndex(newIndex);
+              setShowTextboxEvent1(false); // 화면이 다시 흐르기 시작하면 textbox_event1 숨기기
             }, 8000); // 8초 동안 멈춤
             return;
           }
@@ -552,6 +569,28 @@ const Tutorial = ({ width, height }) => {
               홈으로 돌아가기
             </button>
           </div>
+        </div>
+      )}
+      {showTextboxEvent1 && textboxEvent1 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(10% + 40px)', // 기존 위치에서 40px 아래로
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${height / 4}px`,
+            width: 'auto',
+            zIndex: 15,
+          }}
+        >
+          <img
+            src={textboxEvent1.src}
+            alt="Textbox Event 1"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
         </div>
       )}
     </div>
