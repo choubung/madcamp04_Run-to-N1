@@ -42,12 +42,14 @@ const Tutorial = ({ width, height }) => {
   const [textboxEvent2, setTextboxEvent2] = useState(null);
   const [textboxEvent3, setTextboxEvent3] = useState(null);
   const [textboxEnding1, setTextboxEnding1] = useState(null);
-  const [textboxEnding2, setTextboxEnding2] = useState(null); // 추가된 부분
+  const [textboxEnding2, setTextboxEnding2] = useState(null);
+  const [geeseCrossing, setGeeseCrossing] = useState(null);
   const [showTextboxEvent1, setShowTextboxEvent1] = useState(false);
   const [showTextboxEvent2, setShowTextboxEvent2] = useState(false);
   const [showTextboxEvent3, setShowTextboxEvent3] = useState(false);
   const [showTextboxEnding1, setShowTextboxEnding1] = useState(false);
-  const [showTextboxEnding2, setShowTextboxEnding2] = useState(false); // 추가된 부분
+  const [showTextboxEnding2, setShowTextboxEnding2] = useState(false);
+  const [showGeeseCrossing, setShowGeeseCrossing] = useState(false);
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -203,6 +205,14 @@ const Tutorial = ({ width, height }) => {
       .catch((err) => {
         console.error('Failed to load textbox_ending2 image:', err);
       });
+
+    loadImage(require('./images/geese_crossing.png'))
+      .then((image) => {
+        setGeeseCrossing(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load geese_crossing image:', err);
+      });
   }, []);
 
   useEffect(() => {
@@ -238,6 +248,7 @@ const Tutorial = ({ width, height }) => {
 
             if (bgIndex === 3) {
               setShowTextboxEvent1(true);
+              setShowGeeseCrossing(true);
             }
             if (bgIndex === 4) {
               setShowTextboxEvent2(true);
@@ -257,6 +268,7 @@ const Tutorial = ({ width, height }) => {
               setShowTextboxEvent1(false);
               setShowTextboxEvent2(false);
               setShowTextboxEvent3(false);
+              setShowGeeseCrossing(false);
             }, 8000);
             return;
           }
@@ -583,6 +595,30 @@ const Tutorial = ({ width, height }) => {
           <img
             src={textboxEvent1.src}
             alt="Textbox Event 1"
+            style={{
+              height: '100%',
+              width: 'auto',
+            }}
+          />
+        </div>
+      )}
+      {showGeeseCrossing && geeseCrossing && (
+        <div
+          className="blinking-geese"
+          style={{
+            position: 'absolute',
+            top: 'calc(20% + 160px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            height: `${(height / 4) * 0.8}px`,
+            width: 'auto',
+            zIndex: 14,
+            animation: 'blinking 1s infinite',
+          }}
+        >
+          <img
+            src={geeseCrossing.src}
+            alt="Geese Crossing"
             style={{
               height: '100%',
               width: 'auto',
