@@ -118,7 +118,7 @@ const Tutorial = ({ width, height }) => {
             setNextBgImage(images[2]);
             setBgIndex(1);
           }, 1000); // fade-out 애니메이션 시간과 일치시키기
-        }, 5000);
+        }, 2500);
       })
       .catch((err) => {
         console.error('Failed to load background images:', err);
@@ -144,12 +144,8 @@ const Tutorial = ({ width, height }) => {
           }
 
           // 특정 배경일 때 멈추기
-          if (
-            bgIndex === 2 ||
-            bgIndex === 3 ||
-            bgIndex === 4 ||
-            bgIndex === 5
-          ) {
+          const pauseBackgrounds = [3, 4, 5]; // bg_lake, bg_kaimaru, bg_mugunghwa의 인덱스
+          if (pauseBackgrounds.includes(bgIndex)) {
             setIsBackgroundPause(true);
             setJellies([]);
             setObstacles([]);
@@ -263,7 +259,6 @@ const Tutorial = ({ width, height }) => {
             character.y + character.height > obstacle.y
           ) {
             setIsGameOver(true);
-            // alert('Game Over!');
           }
         });
       }
