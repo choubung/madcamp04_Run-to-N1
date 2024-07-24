@@ -82,6 +82,11 @@ const Tutorial = ({ width, height }) => {
   const jumpSoundRef = useRef(null);
   const jellySoundRef = useRef(null);
   const backgroundMusicRef = useRef(null);
+  const event1SoundRef = useRef(null); // 추가된 오디오 파일 레퍼런스
+  const event2SoundRef = useRef(null); // 추가된 오디오 파일 레퍼런스
+  const event3SoundRef = useRef(null); // 추가된 오디오 파일 레퍼런스
+  const ending1SoundRef = useRef(null); // 추가된 오디오 파일 레퍼런스
+  const ending2SoundRef = useRef(null); // 추가된 오디오 파일 레퍼런스
 
   const coffeeRef = useRef(null);
   const debugMode = false;
@@ -244,10 +249,20 @@ const Tutorial = ({ width, height }) => {
     jumpSoundRef.current = new Audio('/jump.mp3');
     jellySoundRef.current = new Audio('/jelly.mp3');
     backgroundMusicRef.current = new Audio('/background.mp3');
+    event1SoundRef.current = new Audio('/event1_jw.m4a'); // 추가된 오디오 파일 로드
+    event2SoundRef.current = new Audio('/event2_jw.m4a'); // 추가된 오디오 파일 로드
+    event3SoundRef.current = new Audio('/event3_jw.m4a'); // 추가된 오디오 파일 로드
+    ending1SoundRef.current = new Audio('/ending1_jw.m4a'); // 추가된 오디오 파일 로드
+    ending2SoundRef.current = new Audio('/ending2_jw.m4a'); // 추가된 오디오 파일 로드
 
     const jumpSound = jumpSoundRef.current;
     const jellySound = jellySoundRef.current;
     const backgroundMusic = backgroundMusicRef.current;
+    const event1Sound = event1SoundRef.current; // 추가된 오디오 파일 레퍼런스
+    const event2Sound = event2SoundRef.current; // 추가된 오디오 파일 레퍼런스
+    const event3Sound = event3SoundRef.current; // 추가된 오디오 파일 레퍼런스
+    const ending1Sound = ending1SoundRef.current; // 추가된 오디오 파일 레퍼런스
+    const ending2Sound = ending2SoundRef.current; // 추가된 오디오 파일 레퍼런스
 
     jumpSound.volume = 1.0;
     jellySound.volume = 0.3;
@@ -263,6 +278,11 @@ const Tutorial = ({ width, height }) => {
       jumpSound.pause();
       jellySound.pause();
       backgroundMusic.pause();
+      event1Sound.pause(); // 추가된 오디오 파일 정리
+      event2Sound.pause(); // 추가된 오디오 파일 정리
+      event3Sound.pause(); // 추가된 오디오 파일 정리
+      ending1Sound.pause(); // 추가된 오디오 파일 정리
+      ending2Sound.pause(); // 추가된 오디오 파일 정리
     };
   }, []);
 
@@ -629,6 +649,36 @@ const Tutorial = ({ width, height }) => {
       return () => clearInterval(miumInterval);
     }
   }, [showTextboxEvent3, width]);
+
+  useEffect(() => {
+    if (showTextboxEvent1) {
+      playSound(event1SoundRef.current); // event1_jw.m4a 오디오 파일 재생
+    }
+  }, [showTextboxEvent1]);
+
+  useEffect(() => {
+    if (showTextboxEvent2) {
+      playSound(event2SoundRef.current); // event2_jw.m4a 오디오 파일 재생
+    }
+  }, [showTextboxEvent2]);
+
+  useEffect(() => {
+    if (showTextboxEvent3) {
+      playSound(event3SoundRef.current); // event3_jw.m4a 오디오 파일 재생
+    }
+  }, [showTextboxEvent3]);
+
+  useEffect(() => {
+    if (showTextboxEnding1) {
+      playSound(ending1SoundRef.current); // ending1_jw.m4a 오디오 파일 재생
+    }
+  }, [showTextboxEnding1]);
+
+  useEffect(() => {
+    if (showTextboxEnding2) {
+      playSound(ending2SoundRef.current); // ending2_jw.m4a 오디오 파일 재생
+    }
+  }, [showTextboxEnding2]);
 
   const resetGame = () => {
     setIsGameOver(false);
