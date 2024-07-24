@@ -44,12 +44,14 @@ const Tutorial = ({ width, height }) => {
   const [textboxEnding1, setTextboxEnding1] = useState(null);
   const [textboxEnding2, setTextboxEnding2] = useState(null);
   const [geeseCrossing, setGeeseCrossing] = useState(null);
+  const [gooseImage, setGooseImage] = useState(null);
   const [showTextboxEvent1, setShowTextboxEvent1] = useState(false);
   const [showTextboxEvent2, setShowTextboxEvent2] = useState(false);
   const [showTextboxEvent3, setShowTextboxEvent3] = useState(false);
   const [showTextboxEnding1, setShowTextboxEnding1] = useState(false);
   const [showTextboxEnding2, setShowTextboxEnding2] = useState(false);
   const [showGeeseCrossing, setShowGeeseCrossing] = useState(false);
+  const [gooseYPositions, setGooseYPositions] = useState(Array(6).fill(0.86));
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -212,6 +214,14 @@ const Tutorial = ({ width, height }) => {
       })
       .catch((err) => {
         console.error('Failed to load geese_crossing image:', err);
+      });
+
+    loadImage(require('./images/goose.png'))
+      .then((image) => {
+        setGooseImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load goose image:', err);
       });
   }, []);
 
@@ -397,6 +407,29 @@ const Tutorial = ({ width, height }) => {
     isGameCompleted,
   ]);
 
+  useEffect(() => {
+    const jumpInterval = setInterval(() => {
+      setGooseYPositions((prevPositions) =>
+        prevPositions.map((pos, i) => {
+          const jumpHeight = 10;
+          const jumpSpeed = 0.5;
+          return pos >= 0.86 ? pos - jumpHeight / height : 0.86;
+        })
+      );
+    }, 1000);
+
+    const fallInterval = setInterval(() => {
+      setGooseYPositions((prevPositions) =>
+        prevPositions.map((pos) => (pos < 0.86 ? pos + 0.5 / height : 0.86))
+      );
+    }, 20);
+
+    return () => {
+      clearInterval(jumpInterval);
+      clearInterval(fallInterval);
+    };
+  }, [height]);
+
   const resetGame = () => {
     setIsGameOver(false);
     setIsGameCompleted(false);
@@ -422,6 +455,44 @@ const Tutorial = ({ width, height }) => {
     setEnterKeyCount(0);
     setShowTextboxEnding1(false);
     setShowTextboxEnding2(false);
+  };
+
+  const renderGooses = () => {
+    const gooses = [];
+    const gooseSize = 50;
+    const margin = 10;
+    const numGooses = 6;
+    const gooseX = width * 0.7;
+
+    for (let i = 0; i < numGooses; i++) {
+      const gooseY =
+        height * gooseYPositions[i] - (i >= 3 ? gooseSize + margin : 0);
+      const offsetX = i >= 3 ? 20 : 0; // 아래 줄의 거위를 오른쪽으로 10px 옮김
+      gooses.push(
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${gooseY}px`,
+            left: `${gooseX + (gooseSize + margin) * (i % 3) + offsetX}px`,
+            height: `${gooseSize}px`,
+            width: `${gooseSize}px`,
+            transition: 'top 0.2s',
+          }}
+        >
+          <img
+            src={gooseImage.src}
+            alt="Goose"
+            style={{
+              height: '100%',
+              width: '100%',
+            }}
+          />
+        </div>
+      );
+    }
+
+    return gooses;
   };
 
   return (
@@ -626,6 +697,7 @@ const Tutorial = ({ width, height }) => {
           />
         </div>
       )}
+      {showGeeseCrossing && gooseImage && renderGooses()}
       {showTextboxEvent2 && textboxEvent2 && (
         <div
           style={{
