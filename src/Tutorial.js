@@ -4,9 +4,12 @@ import { loadImage } from './utilities';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import './Tutorial.css';
+
+import { useAuth } from './AuthContext';
 import Konva from 'konva';
 
 const Tutorial = ({ width, height }) => {
+  const { user } = useAuth();
   const stageRef = useRef(null);
   const navigate = useNavigate();
   const [character, setCharacter] = useState({
@@ -335,7 +338,11 @@ const Tutorial = ({ width, height }) => {
   };
 
   const goToHome = () => {
-    navigate('/');
+    if (user) {
+      navigate('/mainhome');
+    } else {
+      navigate('/');
+    }
   };
 
   useEffect(() => {
@@ -497,15 +504,17 @@ const Tutorial = ({ width, height }) => {
           if (width - lastObstacleX >= gap) {
             const isUpperObstacle = Math.random() < 0.5;
             const obstacleY = isUpperObstacle
-              ? height - 200
+              ? height - 230
               : height - 88 - character.height / 2;
             setObstacles((prev) => [
               ...prev,
               {
                 x: width,
                 y: obstacleY,
-                width: 38,
-                height: 38,
+                // width: 38,
+                // height: 38,
+                width: isUpperObstacle ? 78 : 38, // 위 장애물 크기 키우기
+                height: isUpperObstacle ? 78 : 38, // 위 장애물 크기 키우기
                 isUpperObstacle,
                 isSlidingObstacle: isUpperObstacle,
               },
@@ -793,6 +802,7 @@ const Tutorial = ({ width, height }) => {
             <Text
               text="+5"
               fontSize={36}
+              fontFamily="NeoDunggeunmo"
               fill="purple"
               x={width - 250}
               y={height / 2 - 100}
