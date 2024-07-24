@@ -45,6 +45,7 @@ const Tutorial = ({ width, height }) => {
   const [textboxEnding2, setTextboxEnding2] = useState(null);
   const [geeseCrossing, setGeeseCrossing] = useState(null);
   const [gooseImage, setGooseImage] = useState(null);
+  const [miumImage, setMiumImage] = useState(null); // 추가된 부분
   const [showTextboxEvent1, setShowTextboxEvent1] = useState(false);
   const [showTextboxEvent2, setShowTextboxEvent2] = useState(false);
   const [showTextboxEvent3, setShowTextboxEvent3] = useState(false);
@@ -52,6 +53,7 @@ const Tutorial = ({ width, height }) => {
   const [showTextboxEnding2, setShowTextboxEnding2] = useState(false);
   const [showGeeseCrossing, setShowGeeseCrossing] = useState(false);
   const [gooseYPositions, setGooseYPositions] = useState(Array(6).fill(0.86));
+  const [miumX, setMiumX] = useState(0); // 추가된 부분
 
   const gravity = 0.8;
   const jumpStrength = -12;
@@ -223,6 +225,14 @@ const Tutorial = ({ width, height }) => {
       .catch((err) => {
         console.error('Failed to load goose image:', err);
       });
+
+    loadImage(require('./images/mium.png'))
+      .then((image) => {
+        setMiumImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load mium image:', err);
+      });
   }, []);
 
   useEffect(() => {
@@ -265,6 +275,7 @@ const Tutorial = ({ width, height }) => {
             }
             if (bgIndex === 5) {
               setShowTextboxEvent3(true);
+              setMiumX(0);
             }
 
             setTimeout(() => {
@@ -430,6 +441,16 @@ const Tutorial = ({ width, height }) => {
     };
   }, [height]);
 
+  useEffect(() => {
+    if (showTextboxEvent3) {
+      const miumInterval = setInterval(() => {
+        setMiumX((prevX) => prevX + width / 500); // 5초 동안 전체 너비를 이동
+      }, 10);
+
+      return () => clearInterval(miumInterval);
+    }
+  }, [showTextboxEvent3, width]);
+
   const resetGame = () => {
     setIsGameOver(false);
     setIsGameCompleted(false);
@@ -467,7 +488,7 @@ const Tutorial = ({ width, height }) => {
     for (let i = 0; i < numGooses; i++) {
       const gooseY =
         height * gooseYPositions[i] - (i >= 3 ? gooseSize + margin : 0);
-      const offsetX = i >= 3 ? 20 : 0; // 아래 줄의 거위를 오른쪽으로 10px 옮김
+      const offsetX = i >= 3 ? 10 : 0; // 아래 줄의 거위를 오른쪽으로 10px 옮김
       gooses.push(
         <div
           key={i}
@@ -720,27 +741,51 @@ const Tutorial = ({ width, height }) => {
           />
         </div>
       )}
-      {showTextboxEvent3 && textboxEvent3 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 'calc(10% + 40px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            height: `${height / 4}px`,
-            width: 'auto',
-            zIndex: 15,
-          }}
-        >
-          <img
-            src={textboxEvent3.src}
-            alt="Textbox Event 3"
+      {showTextboxEvent3 && (
+        <>
+          <div
             style={{
-              height: '100%',
+              position: 'absolute',
+              top: 'calc(10% + 40px)',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              height: `${height / 4}px`,
               width: 'auto',
+              zIndex: 15,
             }}
-          />
-        </div>
+          >
+            <img
+              src={textboxEvent3.src}
+              alt="Textbox Event 3"
+              style={{
+                height: '100%',
+                width: 'auto',
+              }}
+            />
+          </div>
+          {miumImage && (
+            <div
+              style={{
+                position: 'absolute',
+                top: `${height - 115 - character.height * 2.1 + 50}px`,
+                left: `${miumX}px`,
+                height: `${character.height * 2.1}px`,
+                width: 'auto',
+                transition: 'left 0.1s linear',
+                zIndex: 15,
+              }}
+            >
+              <img
+                src={miumImage.src}
+                alt="Mium"
+                style={{
+                  height: '100%',
+                  width: 'auto',
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
       {showTextboxEnding1 && textboxEnding1 && (
         <div
