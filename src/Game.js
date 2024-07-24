@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Rect } from 'react-konva';
 import { loadImage } from './utilities'; // loadImage 함수 임포트
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import './Game.css';
+
 const Game = ({ width, height }) => {
   const stageRef = useRef(null);
   const navigate = useNavigate();
@@ -18,7 +19,10 @@ const Game = ({ width, height }) => {
     frame: 0,
     width: 38,
     height: 64,
+    isSliding: false, // 슬라이딩 상태 추가
   });
+
+  const [slidingImage, setSlidingImage] = useState(null);
   const [jellies, setJellies] = useState([]);
   const [obstacles, setObstacles] = useState([]);
   const [score, setScore] = useState(0);
@@ -35,48 +39,60 @@ const Game = ({ width, height }) => {
   const [timer, setTimer] = useState(60); // 타이머 추가
   const [speed, setSpeed] = useState(5);
   const [userScore, setUserScore] = useState(null);
-  const jumpSound = new Audio('/jump.mp3');
-  const jellySound = new Audio('/jelly.mp3');
-  const obstacleSound = new Audio('/MP_Blast.mp3');
   const [hearts, setHearts] = useState(3); // 하트 추가
   const [heartImage, setHeartImage] = useState(null); // 하트 이미지 상태 추가
   const [invincible, setInvincible] = useState(false); // 무적 모드 상태 추가
-
-  jellySound.volume = 0.3; // 젤리 소리 볼륨 조절
-
-  const gravity = 0.8;
-  const jumpStrength = -12;
-  const maxJumpHeight = jumpStrength ** 2 / (2 * gravity);
-
+  const jumpSoundRef = useRef(null);
+  const jellySoundRef = useRef(null);
+  const backgroundMusicRef = useRef(null);
+  const [slidingObstacleImage, setSlidingObstacleImage] = useState(null);
   const debugMode = false;
 
-  const handleKeyDown = (e) => {
-    if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
-      setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
-      jumpSound.play();
-    }
-    if (e.key === 'Enter' && isGameOver) {
-      resetGame();
-    }
-  };
+  const baseGravity = 0.8;
+  const baseJumpStrength = -10; // 점프 강도를 조정하여 최고 높이 낮춤
 
-  const handleMouseDown = () => {
-    if (!character.isJumping) {
-      setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
-      jumpSound.play();
+  const minJellyGap = 50; // 젤리 간격 조정
+  const maxJellyGap = 150;
+
+  const [gravity, setGravity] = useState(baseGravity);
+  const [jumpStrength, setJumpStrength] = useState(baseJumpStrength);
+
+  // 슬라이딩 상태 변경에 따른 캐릭터 크기와 y 좌표 조정
+  useEffect(() => {
+    if (character.isSliding) {
+      setCharacter((prev) => ({
+        ...prev,
+        height: 32,
+        y: height - 115 - 32,
+        width: 64, // 슬라이딩 시 캐릭터 넓이 변경
+      }));
+    } else {
+      setCharacter((prev) => ({
+        ...prev,
+        height: 64,
+        y: height - 115 - 64,
+        width: 38, // 슬라이딩 아닐 때 캐릭터 넓이 원래대로
+      }));
     }
-  };
+  }, [character.isSliding, height]);
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('mousedown', handleMouseDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('mousedown', handleMouseDown);
-    };
-  }, [character.isJumping, isGameOver]);
+    loadImage(require('./images/slide.png')) // 슬라이딩 이미지 로드
+      .then((image) => {
+        setSlidingImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load sliding image:', err);
+      });
 
-  useEffect(() => {
+    loadImage(require('./images/bird.png')) // 슬라이딩 장애물 이미지 로드
+      .then((image) => {
+        setSlidingObstacleImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load sliding obstacle image:', err);
+      });
+
     loadImage(require('./images/americano.png'))
       .then((image) => {
         setJellyImage(image);
@@ -92,6 +108,7 @@ const Game = ({ width, height }) => {
       .catch((err) => {
         console.error('Failed to load obstacle image:', err);
       });
+
     loadImage(require('./images/heart.png'))
       .then((image) => {
         setHeartImage(image);
@@ -133,6 +150,83 @@ const Game = ({ width, height }) => {
   }, []);
 
   useEffect(() => {
+    jumpSoundRef.current = new Audio('/jump.mp3');
+    jellySoundRef.current = new Audio('/jelly.mp3');
+    backgroundMusicRef.current = new Audio('/background.mp3');
+
+    const jumpSound = jumpSoundRef.current;
+    const jellySound = jellySoundRef.current;
+    const backgroundMusic = backgroundMusicRef.current;
+
+    jumpSound.volume = 1.0;
+    jellySound.volume = 0.3; // 젤리 소리 볼륨 조절
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = 0.3;
+    backgroundMusic
+      .play()
+      .catch((error) =>
+        console.error('Failed to play background music:', error)
+      );
+
+    return () => {
+      jumpSound.pause();
+      jellySound.pause();
+      backgroundMusic.pause();
+    };
+  }, []);
+
+  const playSound = (sound) => {
+    sound.currentTime = 0; // 오디오 재생을 처음부터 시작
+    sound
+      .play()
+      .catch((error) => console.error('Failed to play sound:', error));
+  };
+
+  const handleKeyDown = useCallback(
+    (e) => {
+      if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
+        setCharacter((prev) => ({
+          ...prev,
+          vy: jumpStrength,
+          isJumping: true,
+        }));
+        playSound(jumpSoundRef.current); // 오디오 재생
+      }
+      if (e.key === 'ArrowDown' && !character.isJumping) {
+        setCharacter((prev) => ({ ...prev, isSliding: true }));
+      }
+      if (e.key === 'Enter' && isGameOver) {
+        resetGame();
+      }
+    },
+    [character.isJumping, isGameOver, jumpStrength]
+  );
+
+  const handleKeyUp = useCallback((e) => {
+    if (e.key === 'ArrowDown') {
+      setCharacter((prev) => ({ ...prev, isSliding: false }));
+    }
+  }, []);
+
+  const handleMouseDown = useCallback(() => {
+    if (!character.isJumping) {
+      setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
+      playSound(jumpSoundRef.current); // 오디오 재생
+    }
+  }, [character.isJumping, jumpStrength]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('mousedown', handleMouseDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, [handleKeyDown, handleKeyUp, handleMouseDown]);
+
+  useEffect(() => {
     const newY = height - character.height - 115;
     setCharacter((prev) => ({ ...prev, y: newY }));
   }, [height]);
@@ -163,13 +257,18 @@ const Game = ({ width, height }) => {
           return { ...prev, y: newY, vy: newVy, isJumping, frame: newFrame };
         });
 
-        if (Math.random() < 0.03) {
-          const jellyY = height - 115 - 32;
+        // 젤리 배치
+        if (Math.random() < 0.02) {
+          const gap =
+            Math.floor(Math.random() * (maxJellyGap - minJellyGap + 1)) +
+            minJellyGap;
+          const jellyX = width + gap;
+          const jellyY = height - 115 - 32; // 일정하게 땅 위에 젤리 배치
 
           setJellies((prev) => [
             ...prev,
             {
-              x: width,
+              x: jellyX,
               y: jellyY,
               width: 32,
               height: 32,
@@ -184,16 +283,35 @@ const Game = ({ width, height }) => {
             Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
 
           if (width - lastObstacleX >= gap) {
+            const isUpperObstacle = Math.random() < 0.5; // 50% 확률로 위 장애물 생성
+            const obstacleY = isUpperObstacle
+              ? height - 350 // 위 장애물 높이 조정
+              : height - 88 - character.height / 2;
+
             setObstacles((prev) => [
               ...prev,
               {
                 x: width,
-                y: height - 88 - character.height / 2,
-                width: 38,
-                height: 38,
+                y: obstacleY,
+                width: isUpperObstacle ? 108 : 38, // 위 장애물 크기 키우기
+                height: isUpperObstacle ? 108 : 38, // 위 장애물 크기 키우기
+                isUpperObstacle,
               },
             ]);
             setLastObstacleX(width);
+
+            // 장애물 위나 아래에 젤리 배치
+            const jellyY = isUpperObstacle ? obstacleY + 50 : obstacleY - 50;
+
+            setJellies((prev) => [
+              ...prev,
+              {
+                x: width + 30,
+                y: jellyY,
+                width: 32,
+                height: 32,
+              },
+            ]);
           }
         }
 
@@ -225,7 +343,7 @@ const Game = ({ width, height }) => {
           ) {
             setJellies((prev) => prev.filter((_, i) => i !== index));
             setScore((prev) => prev + 1);
-            jellySound.play();
+            playSound(jellySoundRef.current); // 오디오 재생
             if ((score + 1) % 10 === 0) {
               setSpeed((prev) => prev + 1);
             }
@@ -241,13 +359,11 @@ const Game = ({ width, height }) => {
             character.y + character.height > obstacle.y
           ) {
             setHearts((prev) => prev - 1); // 장애물에 닿으면 하트 감소
-            obstacleSound.play();
             if (hearts <= 1) {
               setIsGameOver(true);
             }
             setInvincible(true);
             setTimeout(() => setInvincible(false), 1000); // 1초간 무적 모드
-            // setObstacles((prev) => prev.filter((_, i) => i !== index)); // 충돌 후 장애물 제거
           }
         });
       }
@@ -270,24 +386,15 @@ const Game = ({ width, height }) => {
     score,
     hearts, // 하트 상태 추가
     invincible,
+    gravity,
   ]);
 
-  // useEffect(() => {
-  //   const timerInterval = setInterval(() => {
-  //     if (!isGameOver && !isPaused) {
-  //       setTimer((prev) => {
-  //         if (prev <= 0) {
-  //           setIsGameOver(true);
-  //           clearInterval(timerInterval);
-  //           return 0;
-  //         }
-  //         return prev - 1;
-  //       });
-  //     }
-  //   }, 1000);
-
-  //   return () => clearInterval(timerInterval);
-  // }, [isGameOver, isPaused]);
+  useEffect(() => {
+    // 속도가 증가할 때마다 중력과 점프 강도를 더 크게 조정
+    const gravityMultiplier = 1 + (speed - 5) * 0.2; // 증가 비율을 더 크게 설정
+    setGravity(baseGravity * gravityMultiplier);
+    setJumpStrength(baseJumpStrength * gravityMultiplier);
+  }, [speed]);
 
   const updateScore = async () => {
     if (user) {
@@ -306,6 +413,7 @@ const Game = ({ width, height }) => {
       }
     }
   };
+
   useEffect(() => {
     if (isGameOver) {
       updateScore();
@@ -334,24 +442,18 @@ const Game = ({ width, height }) => {
     setBgIndex(0);
     setBgImage(bgImages[0]);
     setBackgroundX(0);
-    // setTimer(60); // 타이머 리셋
     setHearts(3); // 하트 리셋
     setSpeed(5); // 속도 리셋
+    setGravity(baseGravity); // 중력 리셋
+    setJumpStrength(baseJumpStrength); // 점프 강도 리셋
   };
 
   const goToHome = () => {
-    navigate('/');
+    navigate('/mainhome');
   };
 
   return (
-    <div
-      className="game"
-      style={{
-        position: 'relative',
-        width: `${width}px`,
-        height: `${height}px`,
-      }}
-    >
+    <div className="game">
       <Stage width={width} height={height} ref={stageRef}>
         <Layer>
           {bgImage && (
@@ -379,7 +481,11 @@ const Game = ({ width, height }) => {
                 y={character.y}
                 width={character.width}
                 height={character.height}
-                image={characterImages[Math.floor(character.frame)]}
+                image={
+                  character.isSliding
+                    ? slidingImage
+                    : characterImages[Math.floor(character.frame)]
+                }
                 scaleX={1.5}
                 scaleY={1.5}
               />
@@ -430,7 +536,11 @@ const Game = ({ width, height }) => {
                     y={obstacle.y}
                     width={obstacle.width}
                     height={obstacle.height}
-                    image={obstacleImage}
+                    image={
+                      obstacle.isUpperObstacle
+                        ? slidingObstacleImage
+                        : obstacleImage
+                    }
                   />
                   {debugMode && (
                     <Rect
@@ -445,13 +555,6 @@ const Game = ({ width, height }) => {
                 </>
               )
           )}
-          {/* <Rect
-            x={10}
-            y={10}
-            width={(width - 20) * (timer / 60)}
-            height={20}
-            fill="green"
-          /> */}
           {[...Array(hearts)].map((_, index) => (
             <KonvaImage
               key={index}
@@ -462,13 +565,12 @@ const Game = ({ width, height }) => {
               image={heartImage}
             />
           ))}
-          {/* <Text text={`Time: ${timer}`} fontSize={24} x={10} y={35} /> */}
           <Text
             className="scoretext"
             text={`Score: ${score}`}
             fontSize={24}
-            x={width - 150} // width 값을 이용하여 오른쪽에 배치
-            y={10} // top 값을 이용하여 위쪽에 배치
+            x={width - 150}
+            y={10}
             fontFamily="NeoDunggeunmo"
           />
         </Layer>
@@ -477,7 +579,6 @@ const Game = ({ width, height }) => {
         <div className="game-over">
           <button onClick={resetGame}>다시 하기</button>
           <button onClick={goToHome}>홈으로 가기</button>
-          {/* <button>점수 보기</button> */}
           <button onClick={goToScorePage}>점수 보기</button>
         </div>
       )}

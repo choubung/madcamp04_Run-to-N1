@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Rect } from 'react-konva';
-import { loadImage } from './utilities'; // loadImage 함수 임포트
+import { loadImage } from './utilities';
 import { useNavigate } from 'react-router-dom';
-import './App.css'; // CSS 파일 임포트
+import './App.css';
+import './Tutorial.css';
+import Konva from 'konva';
 
 const Tutorial = ({ width, height }) => {
   const stageRef = useRef(null);
@@ -12,10 +14,20 @@ const Tutorial = ({ width, height }) => {
     y: 290,
     vy: 0,
     isJumping: false,
+    isSliding: false,
     frame: 0,
     width: 38,
     height: 64,
   });
+  const [slidingImage, setSlidingImage] = useState(null);
+  const [extraCharacterImage, setExtraCharacterImage] = useState(null);
+  const [extraCharacter, setExtraCharacter] = useState({
+    x: width,
+    y: height - 115 - character.height,
+    frame: 0,
+  });
+
+  const [isExtraCharacterVisible, setIsExtraCharacterVisible] = useState(false);
   const [jellies, setJellies] = useState([]);
   const [obstacles, setObstacles] = useState([]);
   const [score, setScore] = useState(0);
@@ -43,71 +55,62 @@ const Tutorial = ({ width, height }) => {
   const [textboxEvent3, setTextboxEvent3] = useState(null);
   const [textboxEnding1, setTextboxEnding1] = useState(null);
   const [textboxEnding2, setTextboxEnding2] = useState(null);
-  const [geeseCrossing, setGeeseCrossing] = useState(null);
   const [showTextboxEvent1, setShowTextboxEvent1] = useState(false);
   const [showTextboxEvent2, setShowTextboxEvent2] = useState(false);
   const [showTextboxEvent3, setShowTextboxEvent3] = useState(false);
   const [showTextboxEnding1, setShowTextboxEnding1] = useState(false);
   const [showTextboxEnding2, setShowTextboxEnding2] = useState(false);
+  const [isMovingLeft, setIsMovingLeft] = useState(false);
+  const [isStopped, setIsStopped] = useState(false);
+
+  // 추가된 상태
+  const [coffeeImage, setCoffeeImage] = useState(null);
+  const [showCoffeeImage, setShowCoffeeImage] = useState(false);
+  const [showScoreEffect, setShowScoreEffect] = useState(false);
+  const [slidingObstacleImage, setSlidingObstacleImage] = useState(null);
+  const [geeseCrossing, setGeeseCrossing] = useState(null);
+  const [gooseImage, setGooseImage] = useState(null);
+  const [miumImage, setMiumImage] = useState(null);
   const [showGeeseCrossing, setShowGeeseCrossing] = useState(false);
+  const [gooseYPositions, setGooseYPositions] = useState(Array(6).fill(0.86));
+  const [miumX, setMiumX] = useState(0);
 
   const gravity = 0.8;
   const jumpStrength = -12;
   const maxJumpHeight = jumpStrength ** 2 / (2 * gravity);
 
+  const jumpSoundRef = useRef(null);
+  const jellySoundRef = useRef(null);
+  const backgroundMusicRef = useRef(null);
+
+  const coffeeRef = useRef(null);
   const debugMode = false;
 
-  const handleKeyDown = (e) => {
-    if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
-      setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
-    }
-    if (e.key === 'Enter') {
-      const now = Date.now();
-      if (now - lastEnterKeyTime <= 500) {
-        setEnterKeyCount((prev) => prev + 1);
-      } else {
-        setEnterKeyCount(1);
-      }
-      setLastEnterKeyTime(now);
-
-      if (enterKeyCount + 1 === 3) {
-        setIsInvincible((prev) => !prev);
-        setEnterKeyCount(0);
-      }
-
-      if (isGameOver) {
-        resetGame();
-      }
-    }
-  };
-
-  const handleMouseDown = () => {
-    if (!character.isJumping) {
-      setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
-    }
-  };
-
-  const handleStageMouseDown = () => {
-    if (showTextboxEnding1) {
-      setShowTextboxEnding1(false);
-      setShowTextboxEnding2(true);
-    }
-  };
-
-  const goToHome = () => {
-    navigate('/');
-  };
-
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('mousedown', handleMouseDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('mousedown', handleMouseDown);
-    };
-  }, [character.isJumping, isGameOver, enterKeyCount, lastEnterKeyTime]);
+    loadImage(require('./images/slide.png'))
+      .then((image) => {
+        setSlidingImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load sliding image:', err);
+      });
 
-  useEffect(() => {
+    loadImage(require('./images/bird.png'))
+      .then((image) => {
+        setSlidingObstacleImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load sliding obstacle image:', err);
+      });
+
+    loadImage(require('./images/americano.png'))
+      .then((image) => {
+        setCoffeeImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load coffee image:', err);
+      });
+
     loadImage(require('./images/americano.png'))
       .then((image) => {
         setJellyImage(image);
@@ -122,6 +125,38 @@ const Tutorial = ({ width, height }) => {
       })
       .catch((err) => {
         console.error('Failed to load obstacle image:', err);
+      });
+
+    loadImage(require('./images/prof_ryu.png'))
+      .then((image) => {
+        setExtraCharacterImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load extra character image:', err);
+      });
+
+    loadImage(require('./images/geese_crossing.png'))
+      .then((image) => {
+        setGeeseCrossing(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load geese_crossing image:', err);
+      });
+
+    loadImage(require('./images/goose.png'))
+      .then((image) => {
+        setGooseImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load goose image:', err);
+      });
+
+    loadImage(require('./images/mium.png'))
+      .then((image) => {
+        setMiumImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load mium image:', err);
       });
 
     Promise.all([
@@ -206,14 +241,154 @@ const Tutorial = ({ width, height }) => {
         console.error('Failed to load textbox_ending2 image:', err);
       });
 
-    loadImage(require('./images/geese_crossing.png'))
-      .then((image) => {
-        setGeeseCrossing(image);
-      })
-      .catch((err) => {
-        console.error('Failed to load geese_crossing image:', err);
-      });
+    jumpSoundRef.current = new Audio('/jump.mp3');
+    jellySoundRef.current = new Audio('/jelly.mp3');
+    backgroundMusicRef.current = new Audio('/background.mp3');
+
+    const jumpSound = jumpSoundRef.current;
+    const jellySound = jellySoundRef.current;
+    const backgroundMusic = backgroundMusicRef.current;
+
+    jumpSound.volume = 1.0;
+    jellySound.volume = 0.3;
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = 0.3;
+    backgroundMusic
+      .play()
+      .catch((error) =>
+        console.error('Failed to play background music:', error)
+      );
+
+    return () => {
+      jumpSound.pause();
+      jellySound.pause();
+      backgroundMusic.pause();
+    };
   }, []);
+
+  const playSound = (sound) => {
+    sound.currentTime = 0;
+    sound
+      .play()
+      .catch((error) => console.error('Failed to play sound:', error));
+  };
+
+  const handleKeyDown = (e) => {
+    if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
+      setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
+      playSound(jumpSoundRef.current);
+    }
+    if (e.key === 'ArrowDown' && !character.isJumping && !character.isSliding) {
+      setCharacter((prev) => ({
+        ...prev,
+        isSliding: true,
+        height: 32,
+        width: 64,
+        y: height - 147,
+      }));
+    }
+
+    if (e.key === 'Enter') {
+      const now = Date.now();
+      if (now - lastEnterKeyTime <= 500) {
+        setEnterKeyCount((prev) => prev + 1);
+      } else {
+        setEnterKeyCount(1);
+      }
+      setLastEnterKeyTime(now);
+
+      if (enterKeyCount + 1 === 3) {
+        setIsInvincible((prev) => !prev);
+        setEnterKeyCount(0);
+      }
+
+      if (isGameOver) {
+        resetGame();
+      }
+    }
+  };
+
+  const handleKeyUp = (e) => {
+    if (e.key === 'ArrowDown') {
+      setCharacter((prev) => ({
+        ...prev,
+        isSliding: false,
+        width: 38,
+        height: 64,
+        y: height - 179,
+      }));
+    }
+  };
+
+  const handleMouseDown = () => {
+    if (!character.isJumping) {
+      setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
+      playSound(jumpSoundRef.current);
+    }
+  };
+
+  const handleStageMouseDown = () => {
+    if (showTextboxEnding1) {
+      setShowTextboxEnding1(false);
+      setShowTextboxEnding2(true);
+    }
+  };
+
+  const goToHome = () => {
+    navigate('/');
+  };
+
+  useEffect(() => {
+    let extraCharacterInterval;
+    if (showTextboxEvent2) {
+      setIsExtraCharacterVisible(true);
+      setExtraCharacter({ x: width, y: height - 115 - character.height });
+      let moveLeftInterval = setInterval(() => {
+        setExtraCharacter((prev) => {
+          const newX = prev.x - 5;
+          if (newX <= width - 300) {
+            clearInterval(moveLeftInterval);
+            setShowCoffeeImage(true);
+            setShowScoreEffect(true);
+            setScore((prev) => prev + 5);
+
+            setTimeout(() => {
+              setShowCoffeeImage(false);
+              setTimeout(() => {
+                setShowScoreEffect(false);
+                let moveRightInterval = setInterval(() => {
+                  setExtraCharacter((prev) => {
+                    const newX = prev.x + 5;
+                    if (newX >= width) {
+                      clearInterval(moveRightInterval);
+                      setIsExtraCharacterVisible(false);
+                    }
+                    return { ...prev, x: newX };
+                  });
+                }, 30);
+              }, 500);
+            }, 2000);
+          }
+          return { ...prev, x: newX };
+        });
+      }, 30);
+    } else {
+      setIsExtraCharacterVisible(false);
+    }
+
+    return () => clearInterval(extraCharacterInterval);
+  }, [showTextboxEvent2, width, height, character.height]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('mousedown', handleMouseDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, [character.isJumping, isGameOver, enterKeyCount, lastEnterKeyTime]);
 
   useEffect(() => {
     const newY = height - character.height - 115;
@@ -255,6 +430,7 @@ const Tutorial = ({ width, height }) => {
             }
             if (bgIndex === 5) {
               setShowTextboxEvent3(true);
+              setMiumX(0);
             }
 
             setTimeout(() => {
@@ -319,13 +495,19 @@ const Tutorial = ({ width, height }) => {
             Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
 
           if (width - lastObstacleX >= gap) {
+            const isUpperObstacle = Math.random() < 0.5;
+            const obstacleY = isUpperObstacle
+              ? height - 200
+              : height - 88 - character.height / 2;
             setObstacles((prev) => [
               ...prev,
               {
                 x: width,
-                y: height - 88 - character.height / 2,
+                y: obstacleY,
                 width: 38,
                 height: 38,
+                isUpperObstacle,
+                isSlidingObstacle: isUpperObstacle,
               },
             ]);
             setLastObstacleX(width);
@@ -360,6 +542,7 @@ const Tutorial = ({ width, height }) => {
           ) {
             setJellies((prev) => prev.filter((_, i) => i !== index));
             setScore((prev) => prev + 1);
+            playSound(jellySoundRef.current);
           }
         });
 
@@ -397,6 +580,56 @@ const Tutorial = ({ width, height }) => {
     isGameCompleted,
   ]);
 
+  useEffect(() => {
+    if (showCoffeeImage) {
+      const anim = new Konva.Animation((frame) => {
+        const coffeeNode = coffeeRef.current;
+        if (coffeeNode) {
+          const scale = Math.sin(frame.time * 0.02) * 0.05 + 1;
+          coffeeNode.scale({ x: scale, y: scale });
+        }
+      }, stageRef.current);
+      anim.start();
+      setTimeout(() => {
+        anim.stop();
+      }, 1000);
+      return () => anim.stop();
+    }
+  }, [showCoffeeImage]);
+
+  useEffect(() => {
+    const jumpInterval = setInterval(() => {
+      setGooseYPositions((prevPositions) =>
+        prevPositions.map((pos, i) => {
+          const jumpHeight = 10;
+          const jumpSpeed = 0.5;
+          return pos >= 0.86 ? pos - jumpHeight / height : 0.86;
+        })
+      );
+    }, 1000);
+
+    const fallInterval = setInterval(() => {
+      setGooseYPositions((prevPositions) =>
+        prevPositions.map((pos) => (pos < 0.86 ? pos + 0.5 / height : 0.86))
+      );
+    }, 20);
+
+    return () => {
+      clearInterval(jumpInterval);
+      clearInterval(fallInterval);
+    };
+  }, [height]);
+
+  useEffect(() => {
+    if (showTextboxEvent3) {
+      const miumInterval = setInterval(() => {
+        setMiumX((prevX) => prevX + width / 500);
+      }, 10);
+
+      return () => clearInterval(miumInterval);
+    }
+  }, [showTextboxEvent3, width]);
+
   const resetGame = () => {
     setIsGameOver(false);
     setIsGameCompleted(false);
@@ -422,6 +655,44 @@ const Tutorial = ({ width, height }) => {
     setEnterKeyCount(0);
     setShowTextboxEnding1(false);
     setShowTextboxEnding2(false);
+  };
+
+  const renderGooses = () => {
+    const gooses = [];
+    const gooseSize = 50;
+    const margin = 10;
+    const numGooses = 6;
+    const gooseX = width * 0.7;
+
+    for (let i = 0; i < numGooses; i++) {
+      const gooseY =
+        height * gooseYPositions[i] - (i >= 3 ? gooseSize + margin : 0);
+      const offsetX = i >= 3 ? 10 : 0;
+      gooses.push(
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${gooseY}px`,
+            left: `${gooseX + (gooseSize + margin) * (i % 3) + offsetX}px`,
+            height: `${gooseSize}px`,
+            width: `${gooseSize}px`,
+            transition: 'top 0.2s',
+          }}
+        >
+          <img
+            src={gooseImage.src}
+            alt="Goose"
+            style={{
+              height: '100%',
+              width: '100%',
+            }}
+          />
+        </div>
+      );
+    }
+
+    return gooses;
   };
 
   return (
@@ -469,7 +740,17 @@ const Tutorial = ({ width, height }) => {
               />
             </>
           )}
-
+          {isExtraCharacterVisible && characterImages.length > 0 && (
+            <KonvaImage
+              x={extraCharacter.x}
+              y={extraCharacter.y}
+              width={character.width}
+              height={character.height}
+              image={extraCharacterImage}
+              scaleX={1.5}
+              scaleY={1.5}
+            />
+          )}
           {!isStarting && characterImages.length > 0 && (
             <>
               <KonvaImage
@@ -477,7 +758,11 @@ const Tutorial = ({ width, height }) => {
                 y={character.y}
                 width={character.width}
                 height={character.height}
-                image={characterImages[Math.floor(character.frame)]}
+                image={
+                  character.isSliding
+                    ? slidingImage
+                    : characterImages[Math.floor(character.frame)]
+                }
                 scaleX={1.5}
                 scaleY={1.5}
               />
@@ -493,7 +778,31 @@ const Tutorial = ({ width, height }) => {
               )}
             </>
           )}
-
+          {showCoffeeImage && coffeeImage && (
+            <KonvaImage
+              x={width - 300}
+              y={height / 2 - 100 / 2}
+              width={100}
+              height={100}
+              image={coffeeImage}
+              className="coffee-image"
+              ref={coffeeRef}
+            />
+          )}
+          {showScoreEffect && (
+            <Text
+              text="+5"
+              fontSize={36}
+              fill="purple"
+              x={width - 250}
+              y={height / 2 - 100}
+              className="score-effect"
+              shadowColor="black"
+              shadowBlur={10}
+              shadowOffset={{ x: 2, y: 2 }}
+              shadowOpacity={0.5}
+            />
+          )}
           {!isStarting &&
             jellies.map(
               (jelly, index) =>
@@ -520,7 +829,6 @@ const Tutorial = ({ width, height }) => {
                   </>
                 )
             )}
-
           {!isStarting &&
             obstacles.map(
               (obstacle, index) =>
@@ -532,7 +840,11 @@ const Tutorial = ({ width, height }) => {
                       y={obstacle.y}
                       width={obstacle.width}
                       height={obstacle.height}
-                      image={obstacleImage}
+                      image={
+                        obstacle.isSlidingObstacle
+                          ? slidingObstacleImage
+                          : obstacleImage
+                      }
                     />
                     {debugMode && (
                       <Rect
@@ -626,6 +938,7 @@ const Tutorial = ({ width, height }) => {
           />
         </div>
       )}
+      {showGeeseCrossing && gooseImage && renderGooses()}
       {showTextboxEvent2 && textboxEvent2 && (
         <div
           style={{
@@ -648,27 +961,51 @@ const Tutorial = ({ width, height }) => {
           />
         </div>
       )}
-      {showTextboxEvent3 && textboxEvent3 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 'calc(10% + 40px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            height: `${height / 4}px`,
-            width: 'auto',
-            zIndex: 15,
-          }}
-        >
-          <img
-            src={textboxEvent3.src}
-            alt="Textbox Event 3"
+      {showTextboxEvent3 && (
+        <>
+          <div
             style={{
-              height: '100%',
+              position: 'absolute',
+              top: 'calc(10% + 40px)',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              height: `${height / 4}px`,
               width: 'auto',
+              zIndex: 15,
             }}
-          />
-        </div>
+          >
+            <img
+              src={textboxEvent3.src}
+              alt="Textbox Event 3"
+              style={{
+                height: '100%',
+                width: 'auto',
+              }}
+            />
+          </div>
+          {miumImage && (
+            <div
+              style={{
+                position: 'absolute',
+                top: `${height - 115 - character.height * 2.1 + 50}px`,
+                left: `${miumX}px`,
+                height: `${character.height * 2.1}px`,
+                width: 'auto',
+                transition: 'left 0.1s linear',
+                zIndex: 15,
+              }}
+            >
+              <img
+                src={miumImage.src}
+                alt="Mium"
+                style={{
+                  height: '100%',
+                  width: 'auto',
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
       {showTextboxEnding1 && textboxEnding1 && (
         <div
@@ -717,8 +1054,8 @@ const Tutorial = ({ width, height }) => {
           />
           <div
             style={{
-              marginTop: '20px', // 여백 추가
-              fontFamily: 'NeoDunggeunmo', // 폰트 설정
+              marginTop: '20px',
+              fontFamily: 'NeoDunggeunmo',
               fontSize: '20px',
               color: 'black',
               cursor: 'pointer',
