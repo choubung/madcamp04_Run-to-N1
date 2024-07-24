@@ -20,7 +20,7 @@ const Mypage = () => {
         />
         <p>닉네임: {user.name}</p>
         <p>최고 점수: {user.score}</p>
-        <p>돈: {user.money}</p>
+        {/* <p>돈: {user.money}</p> */}
       </div>
     </div>
   );

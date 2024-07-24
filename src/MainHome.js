@@ -13,7 +13,7 @@ const MainHome = () => {
   };
   return (
     <div className="mainhome">
-      <h1>Welcome to Pixel Runner</h1>
+      <h1>Run to N1!</h1>
       <div className="character"></div> {/* 캐릭터 애니메이션 추가 */}
       <div className="menu">
         <Link to="/tutorial">

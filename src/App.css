@@ -50,7 +50,8 @@ body {
 .game,
 .tutorial,
 .info,
-.score {
+.score,
+.mypage {
   min-width: 1014px;
   min-height: 596px;
   width: 1014px;
@@ -63,7 +64,7 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   position: relative;
 
-  font-family: 'NeoDunggeunmo', sans-serif;
+  /* font-family: 'NeoDunggeunmo', sans-serif; */
 }
 
 input {
@@ -181,32 +182,6 @@ body {
   gap: 10px;
 }
 
-/* button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-} */
-
-/* .home,
-.login,
-.signup,
-.tutorial,
-.mainhome,
-.game,
-.tutorial,
-.info {
-  min-width: 1014px;
-  min-height: 596px;
-  width: 1014px;
-  height: 596px;
-  /* max-width: 400px; */
-/* margin: 20px auto; */
-/* padding: 20px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  position: relative; */
-
 input {
   display: block;
   width: calc(100% - 20px);
@@ -231,19 +206,6 @@ button:hover {
   background-color: #0056b3;
 }
 
-/* .game-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  /* width: 1014px;
-  height: 596px;
-  background-color: white; /* 게임 배경 색상 */
-/* position: relative; */
-/* } */
-/* .game-area {
-  position: relative;
-} */
 .game-over {
   position: absolute;
   top: 50%;
@@ -303,4 +265,33 @@ button:hover {
   100% {
     opacity: 1;
   }
+}
+.mypage {
+  text-align: center;
+  background-image: url('./images/bg_starting_point.png');
+  background-size: cover;
+  background-repeat: repeat-x;
+  background-position: 0 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-family: 'Press Start 2P', cursive; /* Pixel Art 스타일 폰트 사용 */
+  animation: moveBackground 20s linear infinite;
+  position: relative;
+  min-width: 1014px;
+  min-height: 596px;
+  width: 1014px;
+  height: 596px;
+  /* max-width: 400px; */
+  /* margin: 20px auto; */
+  /* padding: 20px; */
+  background-color: white;
+  /* border-radius: 10px; */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+
+  font-family: 'NeoDunggeunmo', sans-serif;
 }
