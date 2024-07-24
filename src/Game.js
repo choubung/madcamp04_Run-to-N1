@@ -136,7 +136,7 @@ const Game = ({ width, height }) => {
       require('./images/bg_lake.png'),
       require('./images/bg_kaimaru.png'),
       require('./images/bg_mugunghwa.png'),
-      require('./images/bg_n1.png'),
+      require('./images/bg_n1_origin.png'),
     ];
 
     Promise.all(bgPaths.map(loadImage))
