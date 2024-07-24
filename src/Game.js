@@ -285,7 +285,7 @@ const Game = ({ width, height }) => {
           if (width - lastObstacleX >= gap) {
             const isUpperObstacle = Math.random() < 0.5; // 50% 확률로 위 장애물 생성
             const obstacleY = isUpperObstacle
-              ? height - 350 // 위 장애물 높이 조정
+              ? height - 250 // 위 장애물 높이 조정
               : height - 88 - character.height / 2;
 
             setObstacles((prev) => [
@@ -293,8 +293,8 @@ const Game = ({ width, height }) => {
               {
                 x: width,
                 y: obstacleY,
-                width: isUpperObstacle ? 108 : 38, // 위 장애물 크기 키우기
-                height: isUpperObstacle ? 108 : 38, // 위 장애물 크기 키우기
+                width: isUpperObstacle ? 78 : 38, // 위 장애물 크기 키우기
+                height: isUpperObstacle ? 78 : 38, // 위 장애물 크기 키우기
                 isUpperObstacle,
               },
             ]);
