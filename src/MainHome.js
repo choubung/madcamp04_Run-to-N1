@@ -32,8 +32,10 @@ const MainHome = () => {
             className="info-button"
           />
         </Link>
-        <button onClick={handleLogout}>Logout</button>
       </div>
+      <button className="menu-logout" onClick={handleLogout}>
+        Logout
+      </button>
     </div>
   );
 };

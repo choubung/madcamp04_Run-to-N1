@@ -8,8 +8,6 @@ const Home = () => {
       className="home"
       style={{
         position: 'relative',
-        width: `1014px`,
-        height: `596px`,
       }}
     >
       <h1>Welcome to Pixel Runner</h1>

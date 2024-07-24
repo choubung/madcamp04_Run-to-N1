@@ -23,7 +23,7 @@ body {
   background-color: white;
   height: 100vh;
   overflow: hidden;
-  border-radius: 10px;
+  /* border-radius: 10px; */
 }
 
 /* .home {
@@ -59,10 +59,10 @@ body {
   /* margin: 20px auto; */
   /* padding: 20px; */
   background-color: white;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   position: relative;
-  border-radius: 10px;
+
   font-family: 'NeoDunggeunmo', sans-serif;
 }
 
@@ -111,7 +111,7 @@ button:hover {
   text-align: center;
   background: rgba(0, 0, 0, 0.8);
   padding: 20px;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   z-index: 1000;
 }
 
@@ -252,7 +252,7 @@ button:hover {
   text-align: center;
   background: rgba(0, 0, 0, 0.8);
   padding: 20px;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   z-index: 1000;
 }
 
