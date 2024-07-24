@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Rect } from 'react-konva';
 import { loadImage } from './utilities'; // loadImage 함수 임포트
 import { useNavigate } from 'react-router-dom';
 import './App.css'; // CSS 파일 임포트
+import './Tutorial.css';
+import Konva from 'konva';
 
 const Tutorial = ({ width, height }) => {
   const stageRef = useRef(null);
@@ -58,17 +60,71 @@ const Tutorial = ({ width, height }) => {
   const [showTextboxEvent3, setShowTextboxEvent3] = useState(false);
   const [showTextboxEnding1, setShowTextboxEnding1] = useState(false);
   const [showTextboxEnding2, setShowTextboxEnding2] = useState(false); // 추가된 부분
+  const [isMovingLeft, setIsMovingLeft] = useState(false);
+  const [isStopped, setIsStopped] = useState(false);
 
   const gravity = 0.8;
   const jumpStrength = -12;
   const maxJumpHeight = jumpStrength ** 2 / (2 * gravity);
 
+  const jumpSoundRef = useRef(null);
+  const jellySoundRef = useRef(null);
+  const backgroundMusicRef = useRef(null);
+
+  const coffeeRef = useRef(null); // 커피 이미지 참조 추가
   const debugMode = false;
+  const [coffeeImage, setCoffeeImage] = useState(null);
+  const [showCoffeeImage, setShowCoffeeImage] = useState(false);
+  const [showScoreEffect, setShowScoreEffect] = useState(false);
+
+  useEffect(() => {
+    jumpSoundRef.current = new Audio('/jump.mp3');
+    jellySoundRef.current = new Audio('/jelly.mp3');
+    backgroundMusicRef.current = new Audio('/background.mp3');
+
+    const jumpSound = jumpSoundRef.current;
+    const jellySound = jellySoundRef.current;
+    const backgroundMusic = backgroundMusicRef.current;
+
+    jumpSound.volume = 1.0;
+    jellySound.volume = 0.3; // 젤리 소리 볼륨 조절
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = 0.3;
+    backgroundMusic
+      .play()
+      .catch((error) =>
+        console.error('Failed to play background music:', error)
+      );
+
+    return () => {
+      jumpSound.pause();
+      jellySound.pause();
+      backgroundMusic.pause();
+    };
+  }, []);
+
+  const playSound = (sound) => {
+    sound.currentTime = 0; // 오디오 재생을 처음부터 시작
+    sound
+      .play()
+      .catch((error) => console.error('Failed to play sound:', error));
+  };
+
+  useEffect(() => {
+    loadImage(require('./images/americano.png'))
+      .then((image) => {
+        setCoffeeImage(image);
+      })
+      .catch((err) => {
+        console.error('Failed to load coffee image:', err);
+      });
+  }, []);
 
   const handleKeyDown = (e) => {
     if ((e.key === ' ' || e.key === 'ArrowUp') && !character.isJumping) {
       setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
     }
+    playSound(jumpSoundRef.current); // 오디오 재생
     if (e.key === 'Enter') {
       const now = Date.now();
       if (now - lastEnterKeyTime <= 500) {
@@ -92,6 +148,7 @@ const Tutorial = ({ width, height }) => {
   const handleMouseDown = () => {
     if (!character.isJumping) {
       setCharacter((prev) => ({ ...prev, vy: jumpStrength, isJumping: true }));
+      playSound(jumpSoundRef.current); // 오디오 재생
     }
   };
 
@@ -106,37 +163,81 @@ const Tutorial = ({ width, height }) => {
     navigate('/');
   };
 
+  //   useEffect(() => {
+  //     let extraCharacterInterval;
+  //     if (showTextboxEvent2) {
+  //       setIsExtraCharacterVisible(true);
+  //       setExtraCharacter((prev) => ({ ...prev, x: width }));
+  //       extraCharacterInterval = setInterval(() => {
+  //         setExtraCharacter((prev) => {
+  //           const newX = prev.x - 5;
+
+  //           return { ...prev, x: newX };
+  //         });
+  //       }, 30);
+
+  //       setTimeout(() => {
+  //         clearInterval(extraCharacterInterval);
+  //         extraCharacterInterval = setInterval(() => {
+  //           setExtraCharacter((prev) => {
+  //             const newX = prev.x + 5;
+  //             if (newX > width) {
+  //               clearInterval(extraCharacterInterval);
+  //               setIsExtraCharacterVisible(false);
+  //             }
+  //             return { ...prev, x: newX };
+  //           });
+  //         }, 30);
+  //       }, 4000); // 캐릭터가 등장한 후 4초 뒤에 다시 오른쪽으로 이동 시작
+  //     } else {
+  //       setIsExtraCharacterVisible(false);
+  //     }
+
+  //     return () => clearInterval(extraCharacterInterval);
+  //   }, [showTextboxEvent2, width]);
+
   useEffect(() => {
     let extraCharacterInterval;
     if (showTextboxEvent2) {
       setIsExtraCharacterVisible(true);
-      setExtraCharacter((prev) => ({ ...prev, x: width }));
-      extraCharacterInterval = setInterval(() => {
+      setExtraCharacter({ x: width, y: height - 115 - character.height }); // 초기 위치 설정
+      let moveLeftInterval = setInterval(() => {
         setExtraCharacter((prev) => {
           const newX = prev.x - 5;
+          if (newX <= width - 300) {
+            // 왼쪽으로 일정 거리만큼 이동 후 멈춤
+            clearInterval(moveLeftInterval);
+            setShowCoffeeImage(true);
+            setShowScoreEffect(true);
+            setScore((prev) => prev + 5); // 점수 5점 추가
+
+            setTimeout(() => {
+              setShowCoffeeImage(false);
+              setTimeout(() => {
+                setShowScoreEffect(false);
+                let moveRightInterval = setInterval(() => {
+                  setExtraCharacter((prev) => {
+                    const newX = prev.x + 5;
+                    if (newX >= width) {
+                      // 오른쪽으로 화면 밖으로 나가면 멈춤
+                      clearInterval(moveRightInterval);
+                      setIsExtraCharacterVisible(false);
+                    }
+                    return { ...prev, x: newX };
+                  });
+                }, 30);
+              }, 500); // 점수 추가 효과 시간 (0.5초)
+            }, 2000); // 멈춘 후 2초 대기
+          }
           return { ...prev, x: newX };
         });
       }, 30);
-
-      setTimeout(() => {
-        clearInterval(extraCharacterInterval);
-        extraCharacterInterval = setInterval(() => {
-          setExtraCharacter((prev) => {
-            const newX = prev.x + 5;
-            if (newX > width) {
-              clearInterval(extraCharacterInterval);
-              setIsExtraCharacterVisible(false);
-            }
-            return { ...prev, x: newX };
-          });
-        }, 30);
-      }, 4000); // 캐릭터가 등장한 후 4초 뒤에 다시 오른쪽으로 이동 시작
     } else {
       setIsExtraCharacterVisible(false);
     }
 
     return () => clearInterval(extraCharacterInterval);
-  }, [showTextboxEvent2, width]);
+  }, [showTextboxEvent2, width, height, character.height]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -398,20 +499,21 @@ const Tutorial = ({ width, height }) => {
           ) {
             setJellies((prev) => prev.filter((_, i) => i !== index));
             setScore((prev) => prev + 1);
+            playSound(jellySoundRef.current); // 오디오 재생
           }
         });
 
-        // obstacles.forEach((obstacle, index) => {
-        //   if (
-        //     !isInvincible &&
-        //     character.x < obstacle.x + obstacle.width &&
-        //     character.x + character.width > obstacle.x &&
-        //     character.y < obstacle.y + obstacle.height &&
-        //     character.y + character.height > obstacle.y
-        //   ) {
-        //     setIsGameOver(true);
-        //   }
-        // });
+        obstacles.forEach((obstacle, index) => {
+          if (
+            !isInvincible &&
+            character.x < obstacle.x + obstacle.width &&
+            character.x + character.width > obstacle.x &&
+            character.y < obstacle.y + obstacle.height &&
+            character.y + character.height > obstacle.y
+          ) {
+            setIsGameOver(true);
+          }
+        });
       }
     }, 30);
 
@@ -434,6 +536,23 @@ const Tutorial = ({ width, height }) => {
     isInvincible,
     isGameCompleted,
   ]);
+
+  useEffect(() => {
+    if (showCoffeeImage) {
+      const anim = new Konva.Animation((frame) => {
+        const coffeeNode = coffeeRef.current;
+        if (coffeeNode) {
+          const scale = Math.sin(frame.time * 0.02) * 0.05 + 1; // 애니메이션 속도를 높이기 위해 상수를 0.1로 조정
+          coffeeNode.scale({ x: scale, y: scale });
+        }
+      }, stageRef.current);
+      anim.start();
+      setTimeout(() => {
+        anim.stop();
+      }, 1000); // 애니메이션 지속 시간을 1초로 설정
+      return () => anim.stop();
+    }
+  }, [showCoffeeImage]);
 
   const resetGame = () => {
     setIsGameOver(false);
@@ -541,6 +660,52 @@ const Tutorial = ({ width, height }) => {
               )}
             </>
           )}
+          {/* {showCoffeeImage && coffeeImage && (
+            <KonvaImage
+              x={width / 2 - 100 / 2}
+              y={height / 2 - 100 / 2}
+              width={100}
+              height={100}
+              image={coffeeImage}
+              className="coffee-image" // CSS 클래스 추가
+            />
+          )}
+
+          {showScoreEffect && (
+            <Text
+              text="+5"
+              fontSize={24}
+              fill="green"
+              x={width / 2 - 12}
+              y={height / 2 - 60}
+              className="score-effect" // CSS 클래스 추가
+            />
+          )} */}
+          {showCoffeeImage && coffeeImage && (
+            <KonvaImage
+              x={width - 300}
+              y={height / 2 - 100 / 2}
+              width={100}
+              height={100}
+              image={coffeeImage}
+              className="coffee-image"
+              ref={coffeeRef}
+            />
+          )}
+          {showScoreEffect && (
+            <Text
+              text="+5"
+              fontSize={36}
+              fill="purple"
+              x={width - 250}
+              y={height / 2 - 100}
+              className="score-effect"
+              shadowColor="black"
+              shadowBlur={10}
+              shadowOffset={{ x: 2, y: 2 }}
+              shadowOpacity={0.5}
+            />
+          )}
 
           {!isStarting &&
             jellies.map(
@@ -597,6 +762,7 @@ const Tutorial = ({ width, height }) => {
             )}
         </Layer>
       </Stage>
+
       <div
         style={{
           position: 'absolute',

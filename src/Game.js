@@ -207,9 +207,10 @@ const Game = ({ width, height }) => {
           const newFrame = (prev.frame + 1 / 5) % 4;
           return { ...prev, y: newY, vy: newVy, isJumping, frame: newFrame };
         });
-
         if (Math.random() < 0.03) {
-          const jellyY = height - 115 - 32;
+          const minY = height - 88 - character.height / 2 - 32;
+          const maxY = height - 115 - character.height - maxJumpHeight - 32;
+          const jellyY = Math.random() * (maxY - minY) + minY;
 
           setJellies((prev) => [
             ...prev,
@@ -221,6 +222,19 @@ const Game = ({ width, height }) => {
             },
           ]);
         }
+        // if (Math.random() < 0.03) {
+        //   const jellyY = height - 115 - 32;
+
+        //   setJellies((prev) => [
+        //     ...prev,
+        //     {
+        //       x: width,
+        //       y: jellyY,
+        //       width: 32,
+        //       height: 32,
+        //     },
+        //   ]);
+        // }
 
         if (Math.random() < 0.03) {
           const minGap = 120;
