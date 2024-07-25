@@ -21,7 +21,7 @@ https://github.com/choubung
 ## About
 ### Home
 <img width="100%" src="https://github.com/user-attachments/assets/0cbe0bb1-7ea5-4909-a17c-026d1f5d8fa3">
-<br/>
+
 - `로그인`, `회원가입`, `튜토리얼`로 이루어진 메인 화면입니다.
 - `튜토리얼`은 로그인 없이 플레이가 가능합니다.
 - 오른쪽 하단에는 `크레딧` 박스가 있습니다.
@@ -30,7 +30,7 @@ https://github.com/choubung
 ### Sign up / Login
 <img width="50%" src="https://github.com/user-attachments/assets/173628c5-be48-4f5d-991c-877db55c8dea">
 <img width="50%" src="https://github.com/user-attachments/assets/da8abc9c-1f1c-4f28-9b19-68488a615e24">
-<br/>
+
 - ID, 비밀번호, 닉네임을 입력해 간단히 `회원가입` 할 수 있습니다.
 - 나중에 `로그인`할 때는 ID와 비밀번호를 이용합니다.
 <br/><br/>
@@ -74,7 +74,7 @@ https://github.com/choubung
 ### Game
 <img width="50%" src="https://github.com/user-attachments/assets/27b08f03-0912-4ecd-857f-bb7f0b6fbc51">
 <img width="50%" src="https://github.com/user-attachments/assets/c14ab800-cd62-4f13-8915-e7feb11a67da">
-<br/>
+
 - 마우스클릭, 스페이스바, 상향 방향키로 `점프`할 수 있습니다.
 - 하향 방향키를 누르면 `슬라이딩`이 가능합니다.
 - 피해야 하는 `장애물`은 `레바콘`과 `백로`입니다.
