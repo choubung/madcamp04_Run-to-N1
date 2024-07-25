@@ -852,7 +852,7 @@ const Tutorial = ({ width, height }) => {
               ref={coffeeRef}
             />
           )}
-          {showScoreEffect && (
+          {/* {showScoreEffect && (
             <Text
               text="+5"
               fontSize={36}
@@ -866,7 +866,7 @@ const Tutorial = ({ width, height }) => {
               shadowOffset={{ x: 2, y: 2 }}
               shadowOpacity={0.5}
             />
-          )}
+          )} */}
           {!isStarting &&
             jellies.map(
               (jelly, index) =>
