@@ -65,7 +65,8 @@ https://github.com/choubung
 <br/>
 - `Ending`
 <img width="50%" src="https://github.com/user-attachments/assets/a70c9d55-2e60-41d4-ac46-338f8104dcae">
-<img width="50%" src="https://github.com/user-attachments/assets/cb86d820-0a94-43b2-a250-665d4a4d2130">    
+<img width="50%" src="https://github.com/user-attachments/assets/cb86d820-0a94-43b2-a250-665d4a4d2130">
+<br/> 
     - 플레이어가 무사히 N1에 도착했습니다.
     - `Special Thanks to`가 포함되어 있습니다.
 <br/><br/><br/>
@@ -73,6 +74,7 @@ https://github.com/choubung
 ### Game
 <img width="50%" src="https://github.com/user-attachments/assets/27b08f03-0912-4ecd-857f-bb7f0b6fbc51">
 <img width="50%" src="https://github.com/user-attachments/assets/c14ab800-cd62-4f13-8915-e7feb11a67da">
+<br/>
 - 마우스클릭, 스페이스바, 상향 방향키로 `점프`할 수 있습니다.
 - 하향 방향키를 누르면 `슬라이딩`이 가능합니다.
 - 피해야 하는 `장애물`은 `레바콘`과 `백로`입니다.
@@ -82,4 +84,5 @@ https://github.com/choubung
 
 ### Credit
 <img width="100%" src="https://github.com/user-attachments/assets/3e01bb5f-9b89-4109-a75d-ddaa341c8ee7">
+<br/>
 - 개발자들의 `프로필`과 `깃허브 링크`가 표시되는 페이지입니다.
