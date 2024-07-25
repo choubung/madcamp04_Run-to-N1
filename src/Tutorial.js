@@ -328,6 +328,10 @@ const Tutorial = ({ width, height }) => {
       if (isGameOver) {
         resetGame();
       }
+      if (showTextboxEnding1) {
+        setShowTextboxEnding1(false);
+        setShowTextboxEnding2(true);
+      }
     }
   };
 
