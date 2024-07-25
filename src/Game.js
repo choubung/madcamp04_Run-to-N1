@@ -9,7 +9,7 @@ import './Game.css';
 const Game = ({ width, height }) => {
   const stageRef = useRef(null);
   const navigate = useNavigate();
-  const { user } = useAuth(); // 로그인한 사용자 정보 가져오기
+  const { user, userid } = useAuth(); // 로그인한 사용자 정보 가져오기
 
   const [character, setCharacter] = useState({
     x: 120,
@@ -283,9 +283,9 @@ const Game = ({ width, height }) => {
             Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
 
           if (width - lastObstacleX >= gap) {
-            const isUpperObstacle = Math.random() < 0.5; // 50% 확률로 위 장애물 생성
+            const isUpperObstacle = Math.random() < 0.2; // 50% 확률로 위 장애물 생성
             const obstacleY = isUpperObstacle
-              ? height - 230 // 위 장애물 높이 조정
+              ? height - 240 // 위 장애물 높이 조정
               : height - 120;
             //height - 88 - character.height / 2;
 
@@ -294,8 +294,8 @@ const Game = ({ width, height }) => {
               {
                 x: width,
                 y: obstacleY,
-                width: isUpperObstacle ? 78 : 38, // 위 장애물 크기 키우기
-                height: isUpperObstacle ? 78 : 38, // 위 장애물 크기 키우기
+                width: isUpperObstacle ? 60 : 38, // 위 장애물 크기 키우기
+                height: isUpperObstacle ? 65 : 38, // 위 장애물 크기 키우기
                 isUpperObstacle,
               },
             ]);
@@ -386,6 +386,7 @@ const Game = ({ width, height }) => {
 
   const updateScore = async () => {
     if (user) {
+      console.log('Updating score for user:', user.userid); // 추가된 부분
       try {
         const response = await axios.post(
           'http://ec2-3-34-49-232.ap-northeast-2.compute.amazonaws.com:2000/update-score',
@@ -555,7 +556,7 @@ const Game = ({ width, height }) => {
           ))}
           <Text
             className="scoretext"
-            text={`Score: ${score}`}
+            text={`Score ${score}`}
             fontSize={24}
             x={width - 150}
             y={10}

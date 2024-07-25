@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import './Signup.css';
+
 const Signup = () => {
   const [userid, setUserid] = useState('');
   const [userpassword, setUserpassword] = useState('');
@@ -23,10 +24,13 @@ const Signup = () => {
       );
       if (response.data.message === 'User registered successfully') {
         alert('Signup successful!');
-        login(response.data.user); // Assuming the server responds with user details
+        const user = {
+          userid: userid,
+          // 필요에 따라 추가 필드를 여기에 포함시킵니다.
+        };
+        login(user);
         navigate('/mainhome');
       } else {
-        // alert('Signup failed: ' + response.data.message);
         alert('중복아이디입니다');
       }
     } catch (error) {

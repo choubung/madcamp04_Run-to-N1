@@ -527,8 +527,8 @@ const Tutorial = ({ width, height }) => {
             Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
 
           if (width - lastObstacleX >= gap) {
-            const isUpperObstacle = Math.random() < 0.5;
-            const obstacleY = isUpperObstacle ? height - 230 : height - 120;
+            const isUpperObstacle = Math.random() < 0.2;
+            const obstacleY = isUpperObstacle ? height - 240 : height - 120;
             setObstacles((prev) => [
               ...prev,
               {
@@ -536,8 +536,8 @@ const Tutorial = ({ width, height }) => {
                 y: obstacleY,
                 // width: 38,
                 // height: 38,
-                width: isUpperObstacle ? 78 : 38, // 위 장애물 크기 키우기
-                height: isUpperObstacle ? 78 : 38, // 위 장애물 크기 키우기
+                width: isUpperObstacle ? 60 : 38, // 위 장애물 크기 키우기
+                height: isUpperObstacle ? 65 : 38, // 위 장애물 크기 키우기
                 isUpperObstacle,
                 isSlidingObstacle: isUpperObstacle,
               },
