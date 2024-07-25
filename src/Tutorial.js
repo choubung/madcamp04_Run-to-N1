@@ -382,7 +382,7 @@ const Tutorial = ({ width, height }) => {
             clearInterval(moveLeftInterval);
             setShowCoffeeImage(true);
             setShowScoreEffect(true);
-            setScore((prev) => prev + 2.5);
+            setScore((prev) => prev + 5);
 
             setTimeout(() => {
               setShowCoffeeImage(false);
