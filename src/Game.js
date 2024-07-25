@@ -286,7 +286,8 @@ const Game = ({ width, height }) => {
             const isUpperObstacle = Math.random() < 0.5; // 50% 확률로 위 장애물 생성
             const obstacleY = isUpperObstacle
               ? height - 230 // 위 장애물 높이 조정
-              : height - 88 - character.height / 2;
+              : height - 120;
+            //height - 88 - character.height / 2;
 
             setObstacles((prev) => [
               ...prev,
@@ -299,19 +300,6 @@ const Game = ({ width, height }) => {
               },
             ]);
             setLastObstacleX(width);
-
-            // 장애물 위나 아래에 젤리 배치
-            const jellyY = isUpperObstacle ? obstacleY + 50 : obstacleY - 50;
-
-            setJellies((prev) => [
-              ...prev,
-              {
-                x: width + 30,
-                y: jellyY,
-                width: 32,
-                height: 32,
-              },
-            ]);
           }
         }
 
