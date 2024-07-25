@@ -93,4 +93,4 @@ https://github.com/choubung
 
 ![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/f6cb388f-3934-47d6-9928-26d2e10eb0fc/fd66a609-8a95-4c93-8a85-380b50e71e7a/Untitled.png)
 
-- 개발자들의 **`프로필`**과 **`깃허브 링크`**가 표시되는 페이지입니다.
+- 개발자들의 `프로필`과 `깃허브 링크`가 표시되는 페이지입니다.
