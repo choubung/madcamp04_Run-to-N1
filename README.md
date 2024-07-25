@@ -28,8 +28,8 @@ https://github.com/choubung
 <br/><br/>
 
 ### Sign up / Login
-<img width="50%" src="https://github.com/user-attachments/assets/173628c5-be48-4f5d-991c-877db55c8dea">
-<img width="50%" src="https://github.com/user-attachments/assets/da8abc9c-1f1c-4f28-9b19-68488a615e24">
+<img width="100%" src="https://github.com/user-attachments/assets/173628c5-be48-4f5d-991c-877db55c8dea">
+<img width="100%" src="https://github.com/user-attachments/assets/da8abc9c-1f1c-4f28-9b19-68488a615e24">
 
 - ID, 비밀번호, 닉네임을 입력해 간단히 `회원가입` 할 수 있습니다.
 - 나중에 `로그인`할 때는 ID와 비밀번호를 이용합니다.
@@ -43,21 +43,22 @@ https://github.com/choubung
 - `opening`
 <img width="100%" src="https://github.com/user-attachments/assets/fbc0ec45-c33e-4e50-8268-9f1966fb2cd5">
 <img width="100%" src="https://github.com/user-attachments/assets/e83b072f-c9be-42f0-bb47-8438557bdc2e">
+
     - 플레이어가 도서관에서 N1으로 출발합니다.
 <br/>
 - `이벤트1`
 <img width="100%" src="https://github.com/user-attachments/assets/0799d9a5-70c3-4162-bf72-9bb50212324b">
-<br/>    
+
     - 오리호수의 거위들이 횡단보도를 건넙니다.
 <br/>    
 - `이벤트2`
 <img width="100%" src="https://github.com/user-attachments/assets/91d7dbe9-c8c7-4ed3-8e54-d0a0857d508b">
-<br/>   
+  
     - 카이마루에서 류석영 교수님께 커피를 받습니다.
 <br/>   
 - `이벤트3`
 <img width="100%" src="https://github.com/user-attachments/assets/2ce11a2d-f3c2-4354-823a-e5e79f974c20">
-<br/>
+
     - N1 출근길에 있는 무궁화길입니다.
     - 킥보드를 타고 가는 3분반 사람이 플레이어를 추월해갑니다.
     - 3분반 사람의 뒤로 트랙터가 따라갑니다.
@@ -66,7 +67,7 @@ https://github.com/choubung
 - `Ending`
 <img width="50%" src="https://github.com/user-attachments/assets/a70c9d55-2e60-41d4-ac46-338f8104dcae">
 <img width="50%" src="https://github.com/user-attachments/assets/cb86d820-0a94-43b2-a250-665d4a4d2130">
-<br/> 
+
     - 플레이어가 무사히 N1에 도착했습니다.
     - `Special Thanks to`가 포함되어 있습니다.
 <br/><br/><br/>
@@ -84,5 +85,5 @@ https://github.com/choubung
 
 ### Credit
 <img width="100%" src="https://github.com/user-attachments/assets/3e01bb5f-9b89-4109-a75d-ddaa341c8ee7">
-<br/>
+
 - 개발자들의 `프로필`과 `깃허브 링크`가 표시되는 페이지입니다.
