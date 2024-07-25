@@ -658,11 +658,14 @@ const Tutorial = ({ width, height }) => {
     if (showTextboxEvent3) {
       const miumInterval = setInterval(() => {
         setMiumX((prevX) => prevX + width / 500);
+        if (miumX > width) {
+          clearInterval(miumInterval);
+        }
       }, 10);
 
       return () => clearInterval(miumInterval);
     }
-  }, [showTextboxEvent3, width]);
+  }, [showTextboxEvent3, width, miumX]);
 
   useEffect(() => {
     if (showTextboxEvent1) {
@@ -770,6 +773,7 @@ const Tutorial = ({ width, height }) => {
         position: 'relative',
         width: `${width}px`,
         height: `${height}px`,
+        overflow: 'hidden', // 추가된 스타일
       }}
       onMouseDown={handleStageMouseDown}
     >
@@ -1062,6 +1066,7 @@ const Tutorial = ({ width, height }) => {
                 width: 'auto',
                 transition: 'left 0.1s linear',
                 zIndex: 15,
+                overflow: 'hidden', // 추가된 스타일
               }}
             >
               <img
