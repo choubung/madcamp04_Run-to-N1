@@ -43,7 +43,6 @@ https://github.com/choubung
 - `opening`
 <img width="100%" src="https://github.com/user-attachments/assets/fbc0ec45-c33e-4e50-8268-9f1966fb2cd5">
 <img width="100%" src="https://github.com/user-attachments/assets/e83b072f-c9be-42f0-bb47-8438557bdc2e">
-<br/>
     - 플레이어가 도서관에서 N1으로 출발합니다.
 <br/>
 - `이벤트1`
