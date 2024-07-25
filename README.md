@@ -82,6 +82,7 @@ https://github.com/choubung
 - `장애물`에 부딪힐 때마다 `생명`이 하나씩 깎입니다. 3개가 모두 사라지면 게임이 종료됩니다.
 - `아메리카노`를 마실 때마다 스코어가 1점씩 올라갑니다.
 - 일정 스코어에 도달할 때마다 `속도`가 빨라지고, 플레이어에게 적용되는 `중력`이 커집니다.
+<br/><br/><br/>
 
 ### Credit
 <img width="100%" src="https://github.com/user-attachments/assets/3e01bb5f-9b89-4109-a75d-ddaa341c8ee7">
