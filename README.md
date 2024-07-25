@@ -47,18 +47,17 @@ https://github.com/choubung
 - 플레이어가 도서관에서 N1으로 출발합니다.
 <br/>
 
-- `이벤트1`
+`이벤트1`
 <img width="100%" src="https://github.com/user-attachments/assets/0799d9a5-70c3-4162-bf72-9bb50212324b">
-
 - 오리호수의 거위들이 횡단보도를 건넙니다.
 <br/>
 
-- `이벤트2`
+`이벤트2`
 <img width="100%" src="https://github.com/user-attachments/assets/91d7dbe9-c8c7-4ed3-8e54-d0a0857d508b">
 - 카이마루에서 류석영 교수님께 커피를 받습니다.
 <br/>   
 
-- `이벤트3`
+`이벤트3`
 <img width="100%" src="https://github.com/user-attachments/assets/2ce11a2d-f3c2-4354-823a-e5e79f974c20">
 
 - N1 출근길에 있는 무궁화길입니다.
@@ -67,7 +66,7 @@ https://github.com/choubung
 - 해당 이벤트는 실화를 바탕으로 합니다.
 <br/>
 
-- `Ending`
+`Ending`
 <img width="50%" src="https://github.com/user-attachments/assets/a70c9d55-2e60-41d4-ac46-338f8104dcae">
 <img width="50%" src="https://github.com/user-attachments/assets/cb86d820-0a94-43b2-a250-665d4a4d2130">
 
