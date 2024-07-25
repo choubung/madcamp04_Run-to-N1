@@ -90,3 +90,7 @@ https://github.com/choubung
 <img width="100%" src="https://github.com/user-attachments/assets/3e01bb5f-9b89-4109-a75d-ddaa341c8ee7">
 
 - 개발자들의 `프로필`과 `깃허브 링크`가 표시되는 페이지입니다.
+<br/><br/><br/>
+
+### Beta
+http://3.34.49.232/
