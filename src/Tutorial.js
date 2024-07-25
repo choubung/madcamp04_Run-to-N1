@@ -657,15 +657,18 @@ const Tutorial = ({ width, height }) => {
   useEffect(() => {
     if (showTextboxEvent3) {
       const miumInterval = setInterval(() => {
-        setMiumX((prevX) => prevX + width / 500);
-        if (miumX > width) {
-          clearInterval(miumInterval);
-        }
+        setMiumX((prevX) => {
+          const newX = prevX + width / 500;
+          if (newX >= width) {
+            clearInterval(miumInterval);
+          }
+          return newX;
+        });
       }, 10);
 
       return () => clearInterval(miumInterval);
     }
-  }, [showTextboxEvent3, width, miumX]);
+  }, [showTextboxEvent3, width]);
 
   useEffect(() => {
     if (showTextboxEvent1) {
@@ -799,14 +802,14 @@ const Tutorial = ({ width, height }) => {
               <KonvaImage
                 x={backgroundX}
                 y={0}
-                width={width}
+                width={width + 5} // 배경 이미지가 더 넓게 설정됨
                 height={height}
                 image={bgImage}
               />
               <KonvaImage
                 x={nextBackgroundX}
                 y={0}
-                width={width}
+                width={width + 5} // 배경 이미지가 더 넓게 설정됨
                 height={height}
                 image={nextBgImage}
               />
