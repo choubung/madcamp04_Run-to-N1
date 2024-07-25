@@ -940,7 +940,7 @@ const Tutorial = ({ width, height }) => {
         <div className="game-over">
           <button onClick={resetGame}>다시 하기</button>
           <button onClick={goToHome}>홈으로 가기</button>
-          <button>점수 보기</button>
+          {/* <button>점수 보기</button> */}
         </div>
       )}
       {isInvincible && (
