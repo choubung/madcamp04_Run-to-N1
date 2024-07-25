@@ -1,0 +1,81 @@
+.home {
+  text-align: center;
+  background-image: url('./images/5-2-05.png');
+  background-size: cover;
+  background-repeat: repeat-x;
+  background-position: 0 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+
+  /* font-family: 'Press Start 2P', cursive; Pixel Art 스타일 폰트 사용 */
+  font-family: 'Press Start 2P', cursive; /* Pixel Art 스타일 폰트 사용 */
+  animation: moveBackground 20s linear infinite;
+}
+
+@keyframes moveBackground {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: +100% 0;
+  }
+}
+
+.menu {
+  margin-top: 20px;
+}
+
+.menu button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  transition: background-color 0.3s;
+  font-family: 'Press Start 2P', cursive; /* Pixel Art 스타일 폰트 사용 */
+}
+
+.menu button:hover {
+  background-color: #45a049;
+}
+
+/* 캐릭터 애니메이션 */
+.character {
+  width: 76px;
+  height: 128px;
+  background-image: url('./images/runner_2.png');
+  background-size: cover;
+  animation: jump 1s infinite;
+  position: absolute; /* 캐릭터를 절대 위치로 설정 */
+  left: 20px; /* 화면의 왼쪽에서 20px 떨어진 위치 */
+  bottom: 80px; /* 화면의 아래에서 20px 떨어진 위치 */
+}
+
+@keyframes jump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+/* .menu img {
+  width: 100px; /* 원하는 너비로 설정 */
+/* height: 100px; /* 원하는 높이로 설정 */
+/* cursor: pointer;
+} */
+
+.info-button {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  width: 50px;
+  height: 50px;
+}

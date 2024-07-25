@@ -1,0 +1,76 @@
+.mainhome {
+  text-align: center;
+  background-image: url('./images/bg_starting_point.png');
+  background-size: cover;
+  background-repeat: repeat-x;
+  background-position: 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-family: 'Press Start 2P', cursive; /* Pixel Art 스타일 폰트 사용 */
+  animation: moveBackground 20s linear infinite;
+}
+
+.mainhome a {
+  text-decoration: none; /* 링크 밑줄 제거 */
+}
+
+@keyframes moveBackground {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: +100% 0;
+  }
+}
+
+.menu {
+  margin-top: 20px;
+}
+
+.menu button {
+  margin: 12px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  transition: background-color 0.3s;
+  font-family: 'Press Start 2P', cursive; /* Pixel Art 스타일 폰트 사용 */
+}
+
+.menu button:hover {
+  background-color: #45a049;
+}
+
+.menu-logout {
+  width: 250px;
+  padding: 10px 10px; /* 버튼 크기 조정 */
+  margin: 10px;
+
+  cursor: pointer;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  transition: background-color 0.3s;
+  font-family: 'Press Start 2P', cursive; /* Pixel Art 스타일 폰트 사용 */
+}
+
+.menu-logout:hover {
+  background-color: #45a049;
+}
+
+/* 캐릭터 애니메이션 */
+
+@keyframes jump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}

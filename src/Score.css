@@ -1,0 +1,73 @@
+.score {
+  padding: 20px;
+  text-align: center;
+  background-image: url('./images/bg_basic.png');
+  background-size: cover;
+  background-repeat: repeat-x;
+  background-position: 0 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: black;
+
+  /* font-family: 'Press Start 2P', cursive; Pixel Art 스타일 폰트 사용 */
+  font-family: 'NeoDunggeunmo', sans-serif;
+  animation: moveBackground 20s linear infinite;
+}
+
+.list {
+  width: 600px;
+  height: 300px;
+
+  /* background-image: url('./images/wood.png'); */
+  background-size: cover;
+  position: relative; /* 오버레이를 위해 위치 설정 */
+
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: larger;
+  color: rgb(255, 255, 255);
+  font-weight: bold; /* 글씨를 굵게 */
+  /* background-color: rgba(117, 143, 236, 0.8); */
+}
+
+.list::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  z-index: 0; /* 오버레이가 배경 뒤에 오도록 설정 */
+}
+
+.list > * {
+  position: relative; /* 오버레이 위에 텍스트가 오도록 설정 */
+  z-index: 1;
+}
+
+/* table {
+  margin: 0 auto;
+  border-collapse: collapse;
+} */
+
+/* th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+} */
+
+/* th {
+  background-color: #f2f2f2;
+} */
+
+.highlight {
+  background-color: rgb(255, 255, 171);
+  font-weight: bold;
+}
