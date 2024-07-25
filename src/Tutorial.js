@@ -382,7 +382,7 @@ const Tutorial = ({ width, height }) => {
             clearInterval(moveLeftInterval);
             setShowCoffeeImage(true);
             setShowScoreEffect(true);
-            setScore((prev) => prev + 5);
+            setScore((prev) => prev + 2.5);
 
             setTimeout(() => {
               setShowCoffeeImage(false);
@@ -528,9 +528,7 @@ const Tutorial = ({ width, height }) => {
 
           if (width - lastObstacleX >= gap) {
             const isUpperObstacle = Math.random() < 0.5;
-            const obstacleY = isUpperObstacle
-              ? height - 230
-              : height - 88 - character.height / 2;
+            const obstacleY = isUpperObstacle ? height - 230 : height - 120;
             setObstacles((prev) => [
               ...prev,
               {
@@ -864,12 +862,12 @@ const Tutorial = ({ width, height }) => {
               ref={coffeeRef}
             />
           )}
-          {/* {showScoreEffect && (
+          {showScoreEffect && (
             <Text
               text="+5"
               fontSize={36}
               fontFamily="NeoDunggeunmo"
-              fill="purple"
+              fill="red"
               x={width - 250}
               y={height / 2 - 100}
               className="score-effect"
@@ -878,7 +876,7 @@ const Tutorial = ({ width, height }) => {
               shadowOffset={{ x: 2, y: 2 }}
               shadowOpacity={0.5}
             />
-          )} */}
+          )}
           {!isStarting &&
             jellies.map(
               (jelly, index) =>
