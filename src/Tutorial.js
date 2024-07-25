@@ -63,6 +63,7 @@ const Tutorial = ({ width, height }) => {
   const [showTextboxEvent3, setShowTextboxEvent3] = useState(false);
   const [showTextboxEnding1, setShowTextboxEnding1] = useState(false);
   const [showTextboxEnding2, setShowTextboxEnding2] = useState(false);
+  const [showReturnHomeButton, setShowReturnHomeButton] = useState(false); // 새 상태 추가
   const [isMovingLeft, setIsMovingLeft] = useState(false);
   const [isStopped, setIsStopped] = useState(false);
 
@@ -656,7 +657,13 @@ const Tutorial = ({ width, height }) => {
   useEffect(() => {
     if (showTextboxEvent3) {
       const miumInterval = setInterval(() => {
-        setMiumX((prevX) => prevX + width / 500);
+        setMiumX((prevX) => {
+          const newX = prevX + width / 500;
+          if (newX >= width) {
+            clearInterval(miumInterval);
+          }
+          return newX;
+        });
       }, 10);
 
       return () => clearInterval(miumInterval);
@@ -690,6 +697,9 @@ const Tutorial = ({ width, height }) => {
   useEffect(() => {
     if (showTextboxEnding2) {
       playSound(ending2SoundRef.current); // ending2_jw.m4a 오디오 파일 재생
+      ending2SoundRef.current.onended = () => {
+        setShowReturnHomeButton(true); // 오디오 파일 재생이 끝나면 버튼 표시
+      };
     }
   }, [showTextboxEnding2]);
 
@@ -718,6 +728,7 @@ const Tutorial = ({ width, height }) => {
     setEnterKeyCount(0);
     setShowTextboxEnding1(false);
     setShowTextboxEnding2(false);
+    setShowReturnHomeButton(false); // 리셋 시 버튼 숨기기
   };
 
   const renderGooses = () => {
@@ -765,6 +776,7 @@ const Tutorial = ({ width, height }) => {
         position: 'relative',
         width: `${width}px`,
         height: `${height}px`,
+        overflow: 'hidden', // 추가된 스타일
       }}
       onMouseDown={handleStageMouseDown}
     >
@@ -790,14 +802,14 @@ const Tutorial = ({ width, height }) => {
               <KonvaImage
                 x={backgroundX}
                 y={0}
-                width={width}
+                width={width + 5} // 배경 이미지가 더 넓게 설정됨
                 height={height}
                 image={bgImage}
               />
               <KonvaImage
                 x={nextBackgroundX}
                 y={0}
-                width={width}
+                width={width + 5} // 배경 이미지가 더 넓게 설정됨
                 height={height}
                 image={nextBgImage}
               />
@@ -1057,6 +1069,7 @@ const Tutorial = ({ width, height }) => {
                 width: 'auto',
                 transition: 'left 0.1s linear',
                 zIndex: 15,
+                overflow: 'hidden', // 추가된 스타일
               }}
             >
               <img
@@ -1116,18 +1129,20 @@ const Tutorial = ({ width, height }) => {
               width: 'auto',
             }}
           />
-          <div
-            style={{
-              marginTop: '20px',
-              fontFamily: 'NeoDunggeunmo',
-              fontSize: '20px',
-              color: 'black',
-              cursor: 'pointer',
-            }}
-            onClick={goToHome}
-          >
-            홈화면으로 돌아가기
-          </div>
+          {showReturnHomeButton && (
+            <div
+              style={{
+                marginTop: '20px',
+                fontFamily: 'NeoDunggeunmo',
+                fontSize: '20px',
+                color: 'black',
+                cursor: 'pointer',
+              }}
+              onClick={goToHome}
+            >
+              홈화면으로 돌아가기
+            </div>
+          )}
         </div>
       )}
     </div>
