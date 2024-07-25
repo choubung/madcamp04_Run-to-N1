@@ -77,6 +77,7 @@ https://github.com/choubung
 ### Game
 <img width="100%" src="https://github.com/user-attachments/assets/27b08f03-0912-4ecd-857f-bb7f0b6fbc51">
 <img width="100%" src="https://github.com/user-attachments/assets/c14ab800-cd62-4f13-8915-e7feb11a67da">
+<img width="100%" src="https://github.com/user-attachments/assets/adab3a51-b26a-43e5-b16b-a55e543ba1dc">
 
 - 마우스클릭, 스페이스바, 상향 방향키로 `점프`할 수 있습니다.
 - 하향 방향키를 누르면 `슬라이딩`이 가능합니다.
@@ -84,6 +85,7 @@ https://github.com/choubung
 - `장애물`에 부딪힐 때마다 `생명`이 하나씩 깎입니다. 3개가 모두 사라지면 게임이 종료됩니다.
 - `아메리카노`를 마실 때마다 스코어가 1점씩 올라갑니다.
 - 일정 스코어에 도달할 때마다 `속도`가 빨라지고, 플레이어에게 적용되는 `중력`이 커집니다.
+- 게임이 끝난 후 `현재 점수`와 `전체 랭킹`을 확인할 수 있습니다.
 <br/><br/><br/>
 
 ### Credit
